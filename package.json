@@ -99,7 +99,20 @@
     "preset": "react-native",
     "modulePathIgnorePatterns": [
       "<rootDir>/example/node_modules",
-      "<rootDir>/lib/"
+      "<rootDir>/lib/",
+      "<rootDir>/__tests__/test-app/node_modules"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/__tests__/unit/setupAfterEnv.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "setupAfterEnv.js",
+      "__tests__/test-app/",
+      "__tests__/integration/"
+    ],
+    "testMatch": [
+      "**/__tests__/unit/**/*.test.[jt]s?(x)"
     ]
   },
   "commitlint": {
