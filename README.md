@@ -13,7 +13,7 @@ The core Rust code that is exposed to the React Native language bindings actuall
 
 ## Notes for developers
 
-Using docs at https://jhugman.github.io/uniffi-bindgen-react-native/guides/rn/getting-started.html to build this library.
+See the docs at https://jhugman.github.io/uniffi-bindgen-react-native/guides/rn/getting-started.html for more advanced information on how to build this library.
 
 To build the library and start testing locally, you must have:
 
@@ -23,7 +23,9 @@ To build the library and start testing locally, you must have:
 - Initiated the submodule (`just submodule-init`)
 - Installed your Rust compilation targets
 
-## Building the library and running the examples
+## Building the library and running the example wallet
+
+The `example/` directory contains a full-featured example wallet app that uses workspaces for development.
 
 ```shell
 # Clone the repo and install prerequisites
@@ -41,6 +43,41 @@ just build-android
 # Start an Android emulator and run the example app
 yarn example start    # In terminal 1
 yarn example android  # In terminal 2
+```
+
+## Running the IntegrationTestingApp
+
+The `IntegrationTestingApp/` directory contains a standalone test app that uses the library as a tarball dependency (similar to how end-users would consume it). This app is **not** part of the workspace and is completely decoupled from the library development.
+
+```shell
+# First, build and package the library
+just build-android
+npm pack  # Creates bdk-rn-0.1.0.tgz
+
+# Install dependencies in the IntegrationTestingApp
+cd IntegrationTestingApp
+npm install
+
+# Run the app
+npm run android  # or npm run ios
+```
+
+## Workflow for testing library changes
+
+When you make changes to the `bdk-rn` library and want to test them in the IntegrationTestingApp:
+
+```shell
+# Make local changes to the Rust code in bdk-ffi/bdk-ffi/src/
+
+# Recompile the libary
+just build-android
+
+# Build the tarball
+npm pack  # Creates updated bdk-rn-0.1.0.tgz
+
+# Reinstall in IntegrationTestingApp
+cd IntegrationTestingApp
+npm install ../bdk-rn-0.1.0.tgz
 ```
 
 ## Notes
