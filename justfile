@@ -43,8 +43,14 @@ rename-library:
 [doc("Build Android library.")]
 build-android:
   yarn ubrn:android --config ubrn.config.yaml
-  
+
+[group("Build")]
+[doc("Build the tarball for Android.")]
+build-tarball:
+  yarn ubrn:android --config ubrn.config.yaml
+  npm pack
+
 [group("Examples")]
 [doc("Launch Android example app.")]
 launch-android:
-  yarn example android
+  cd example && npm install && npm run android

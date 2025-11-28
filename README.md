@@ -23,26 +23,60 @@ To build the library and start testing locally, you must have:
 - Initiated the submodule (`just submodule-init`)
 - Installed your Rust compilation targets
 
-## Building the library and running the example wallet
+## Running the example app (using the pre-built tarball)
 
-The `example/` directory contains a full-featured example wallet app that uses workspaces for development.
+The `example/` directory contains a full-featured example wallet app. The easiest way to get started is to download a pre-built tarball from our [GitHub Releases](https://github.com/bitcoindevkit/bdk-rn/releases).
+
+```shell
+# Clone the repo
+git clone git@github.com:bitcoindevkit/bdk-rn.git
+cd bdk-rn
+
+# Download the pre-built tarball from GitHub releases and add it to the root of this repository
+
+# Install dependencies in the example app
+cd example
+npm install
+# Note: The tarball is already referenced in package.json as file:../bdk-rn-VERSION.tgz
+# Make sure the version matches.
+
+# For iOS, also install pods
+cd ios && pod install && cd ..
+
+# Start the example app
+npm run start     # In terminal 1
+npm run android   # In terminal 2 (or npm run ios for iOS)
+```
+
+## Building the library from source
+
+If you need to modify the library or build from source, you must have the Rust toolchain installed:
 
 ```shell
 # Clone the repo and install prerequisites
-git clone git@github.com:bitcoindevkit/bdk-react-native.git
+git clone git@github.com:bitcoindevkit/bdk-rn.git
+cd bdk-rn
 cargo install cargo-ndk
-yarn install
 
 # Install compilation targets, for example:
 rustup target add aarch64-linux-android aarch64-apple-ios aarch64-apple-ios-sim
 
-# Build the library
+# Build the library and create tarball
 just rename-library
 just build-android
+npm pack  # Creates bdk-rn-VERSION.tgz
 
-# Start an Android emulator and run the example app
-yarn example start    # In terminal 1
-yarn example android  # In terminal 2
+# Install in the example app
+cd example
+npm install
+# The package.json already references the tarball from the parent directory
+
+# For iOS, also install pods
+cd ios && pod install && cd ..
+
+# Start the example app
+npm run start     # In terminal 1
+npm run android   # In terminal 2 (or npm run ios for iOS)
 ```
 
 ## Running the IntegrationTestingApp
