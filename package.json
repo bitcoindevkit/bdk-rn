@@ -1,6 +1,6 @@
 {
   "name": "bdk-rn",
-  "version": "2.2.0-next",
+  "version": "2.2.0-alpha.0",
   "description": "React Native language bindings for the bitcoin development kit",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
