@@ -19,6 +19,7 @@
     "ios",
     "cpp",
     "*.podspec",
+    "BdkRnFramework.xcframework",
     "react-native.config.js",
     "!ios/build",
     "!android/build",
@@ -32,14 +33,14 @@
     "!**/.*"
   ],
   "scripts": {
-    "ubrn:ios": "ubrn build ios --and-generate && (cd example/ios && pod install)",
+    "ubrn:ios": "ubrn build ios --and-generate",
     "ubrn:android": "ubrn build android --and-generate",
     "ubrn:checkout": "ubrn checkout",
     "ubrn:clean": "rm -rfv cpp/ android/CMakeLists.txt android/src/main/java android/*.cpp ios/ src/Native* src/index.*ts* src/generated/",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
+    "clean": "del-cli android/build lib",
     "prepare": "bob build",
     "release": "release-it --only-version"
   },
