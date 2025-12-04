@@ -10,7 +10,7 @@
     "build:ios": "react-native build-ios --mode Debug"
   },
   "dependencies": {
-    "bdk-rn": "file:../bdk-rn-2.2.0-next.tgz",
+    "bdk-rn": "file:./bdk-rn-2.2.0-alpha.0.tgz",
     "react": "19.0.0",
     "react-native": "0.79.2"
   },
