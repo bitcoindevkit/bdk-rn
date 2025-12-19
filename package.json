@@ -51,14 +51,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://bitcoindevkit.org/.git"
+    "url": "https://github.com/bitcoindevkit/bdk-rn"
   },
-  "author": "bdk contributors <dev@bitcoindevkit.org> (https://bitcoindevkit.org/)",
+  "author": "Bitcoin Dev Kit Developers <dev@bitcoindevkit.org> (https://bitcoindevkit.org/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://bitcoindevkit.org//issues"
+    "url": "https://github.com/bitcoindevkit/bdk-rn/issues"
   },
-  "homepage": "https://bitcoindevkit.org/#readme",
+  "homepage": "https://github.com/bitcoindevkit/bdk-rn/",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
