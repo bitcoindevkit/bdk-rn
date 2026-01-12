@@ -300,3 +300,5 @@ toc_depth = 3
 anchor_linenums = true
 line_spans = "__span"
 pygments_lang_class = true
+
+[project.markdown_extensions.pymdownx.superfences]
