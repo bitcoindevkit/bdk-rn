@@ -40,20 +40,10 @@ rename-library:
   rm -f bdk-ffi/bdk-ffi/Cargo.toml.bak
 
 [group("Build")]
-[doc("Build Android library.")]
-build-android:
-  yarn ubrn:android --config ubrn.config.yaml
-
-[group("Build")]
 [doc("Build the tarball for Android only.")]
 build-tarball-android:
   yarn ubrn:android --config ubrn.config.yaml
   npm pack
-
-[group("Build")]
-[doc("Build iOS library.")]
-build-ios:
-  yarn ubrn:ios --config ubrn.config.yaml
 
 [group("Build")]
 [doc("Build the tarball for iOS only.")]
@@ -62,7 +52,7 @@ build-tarball-ios:
   npm pack
 
 [group("Build")]
-[doc("Build the release tarball with both iOS and Android.")]
+[doc("Build the release tarball with ready for both iOS and Android.")]
 build-tarball:
   yarn ubrn:android --config ubrn.config.yaml
   yarn ubrn:ios --config ubrn.config.yaml
