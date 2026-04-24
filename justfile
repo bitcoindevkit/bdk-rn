@@ -34,12 +34,6 @@ submodule-to-master:
   && git pull origin master
 
 [group("Build")]
-[doc("Required for building the library correctly.")]
-rename-library:
-  sed -i.bak '/^\[package\]/,/^\[/ s/^name *= *".*"/name = "bdkffi"/' bdk-ffi/bdk-ffi/Cargo.toml
-  rm -f bdk-ffi/bdk-ffi/Cargo.toml.bak
-
-[group("Build")]
 [doc("Build the tarball for Android only.")]
 build-tarball-android:
   yarn ubrn:android --config ubrn.config.yaml
@@ -57,3 +51,8 @@ build-tarball:
   yarn ubrn:android --config ubrn.config.yaml
   yarn ubrn:ios --config ubrn.config.yaml
   npm pack
+
+[group("Docs")]
+[doc("Serve the docs locally.")]
+docs:
+  uv run zensical serve

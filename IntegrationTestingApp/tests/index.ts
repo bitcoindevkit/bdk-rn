@@ -9,6 +9,7 @@ import { runWalletTests } from './wallet.test';
 import { runDescriptorTests } from './descriptor.test';
 import { runCreatingWalletTests } from './creatingWallet.test';
 import { runPersistenceTests } from './persistence.test';
+import { runBackgroundSyncTests } from './backgroundSync.test';
 
 export async function runAllTests() {
   console.log('\n🧪 Starting BDK Integration Tests...\n');
@@ -23,6 +24,7 @@ export async function runAllTests() {
     runCreatingWalletTests();
     runWalletTests();
     runPersistenceTests();
+    runBackgroundSyncTests();
 
     // Wait for all async tests to complete
     await testRunner.waitForAsyncTests();

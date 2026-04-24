@@ -3,12 +3,15 @@
 ## Run The Tests
 
 ```shell
-npm install ../bdk-rn-0.1.0-next.tgz
+npm install
 
-# Terminal 1: start metro
+# Terminal 1: Monitor the logs
+adb logcat -c && adb logcat -s ReactNativeJS | tee tests.log
+
+# Terminal 2: Start metro
 npx react-native start
 # npm start
 
-# Terminal 2: build the app
+# Terminal 3: Build the app and run the tests
 npm run android
 ```

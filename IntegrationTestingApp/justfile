@@ -1,2 +1,11 @@
+[group("Repo")]
+[doc("Default command; list all available commands.")]
+@list:
+  just --list --unsorted
+
+[group("Test")]
+[doc("Run the tests on the Android application.")]
 test-android:
+  rm -rf node_modules/bdk-rn
+  npm install
   npm run android

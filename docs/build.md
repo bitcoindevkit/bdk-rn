@@ -17,14 +17,11 @@ cd bdk-rn
 # Install compilation targets
 rustup target add aarch64-linux-android aarch64-apple-ios aarch64-apple-ios-sim
 
-# Build the library and create tarball (includes both Android and iOS)
-just rename-library
-
-# Build both platforms and creates bdk-rn-VERSION.tgz
+# Build the library and create bdk-rn-VERSION.tgz tarball (includes both Android and iOS)
 just build-tarball
 ```
 
-## Running the Test Suite
+## Running the Test Suite (Android)
 
 The `IntegrationTestingApp/` directory contains a standalone test app that uses the library as a tarball dependency (similar to how end-users would consume it). This app is **not** part of the workspace and is completely decoupled from the library development.
 
@@ -35,16 +32,17 @@ You can use the following workflow to run the tests locally on an Android emulat
 just build-tarball-android
 
 # Install dependencies in the IntegrationTestingApp
+# Make sure your package.json file references the ../bdk-rn-<version>-next.tgz
+# Start an Android emulator
 cd IntegrationTestingApp
 
-# Make sure your package.json file references the ../bdk-rn-<version>-next.tgz
-npm install
-
-# Start an Android emulator
-# To see tests results in your shell, run this prior to starting the app
+# Terminal 1: Monitor the logs
 adb logcat -c && adb logcat -s ReactNativeJS | tee tests.log
 
-# Run the app
+# Terminal 2: Always restart metro (caching issues)
+npx react-native start --reset-cache
+
+# Terminal 3: Build the app and run the tests
 just test-android
 ```
 
