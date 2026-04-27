@@ -1,125 +1,12 @@
-diff --git a/bdk-ffi/Cargo.lock b/bdk-ffi/Cargo.lock
-index 1c53406..c538100 100644
---- a/bdk-ffi/Cargo.lock
-+++ b/bdk-ffi/Cargo.lock
-@@ -100,53 +100,40 @@ dependencies = [
- name = "base64"
- version = "0.21.7"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
- 
- [[package]]
- name = "base64"
- version = "0.22.1"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
- 
- [[package]]
- name = "basic-toml"
- version = "0.1.10"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "ba62675e8242a4c4e806d12f11d136e626e6c8361d6b829310732241652a178a"
- dependencies = [
-  "serde",
- ]
- 
--[[package]]
--name = "bdk-ffi"
--version = "2.3.0-alpha.0"
--dependencies = [
-- "assert_matches",
-- "bdk_electrum",
-- "bdk_esplora",
-- "bdk_kyoto",
-- "bdk_wallet",
-- "thiserror",
-- "uniffi",
--]
--
- [[package]]
- name = "bdk_chain"
- version = "0.23.2"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "5b5d691fd092aacec7e05046b7d04897d58d6d65ed3152cb6cf65dababcfabed"
- dependencies = [
-  "bdk_core",
-  "bitcoin",
-  "miniscript",
-  "rusqlite",
-  "serde",
- ]
- 
- [[package]]
- name = "bdk_core"
- version = "0.6.2"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "0dbbe4aad0c898bfeb5253c222be3ea3dccfb380a07e72c87e3e4ed6664a6753"
- dependencies = [
-  "bitcoin",
-@@ -182,40 +169,54 @@ checksum = "6f35b9f8b3aa8c4647bec7a92b050c496742d955e0ac1edcb4e7c2deabf63c54"
- dependencies = [
-  "bdk_wallet",
-  "bip157",
- ]
- 
- [[package]]
- name = "bdk_wallet"
- version = "2.3.0"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "b03f1e31ccc562f600981f747d2262b84428cbff52c9c9cdf14d15fb15bd2286"
- dependencies = [
-  "bdk_chain",
-  "bip39",
-  "bitcoin",
-  "miniscript",
-  "rand_core",
-  "serde",
-  "serde_json",
- ]
- 
-+[[package]]
-+name = "bdkffi"
-+version = "2.4.0-alpha.0"
-+dependencies = [
-+ "assert_matches",
-+ "bdk_electrum",
-+ "bdk_esplora",
-+ "bdk_kyoto",
-+ "bdk_wallet",
-+ "thiserror",
-+ "tokio",
-+ "uniffi",
-+]
-+
- [[package]]
- name = "bech32"
- version = "0.11.1"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "32637268377fc7b10a8c6d51de3e7fba1ce5dd371a96e342b34e6078db558e7f"
- 
- [[package]]
- name = "bip157"
- version = "0.3.4"
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "88df5c18baaea9be4219679afbd4fc26491606f89f6ecdaffcdcabd67635b07b"
- dependencies = [
-  "bip324",
-  "bitcoin",
-  "bitcoin-address-book",
-  "tokio",
- ]
- 
- [[package]]
- name = "bip324"
 diff --git a/bdk-ffi/Cargo.toml b/bdk-ffi/Cargo.toml
-index 662ffe6..e9c33ea 100644
+index 4eb2ad1..79d2931 100644
 --- a/bdk-ffi/Cargo.toml
 +++ b/bdk-ffi/Cargo.toml
 @@ -1,39 +1,40 @@
  [package]
 -name = "bdk-ffi"
 +name = "bdkffi"
- version = "2.4.0-alpha.0"
+ version = "3.0.0-alpha.0"
  homepage = "https://bitcoindevkit.org"
  repository = "https://github.com/bitcoindevkit/bdk"
  edition = "2018"
@@ -134,10 +21,10 @@ index 662ffe6..e9c33ea 100644
  path = "uniffi-bindgen.rs"
  
  [dependencies]
- bdk_wallet = { version = "2.3.0", features = ["all-keys", "keys-bip39", "rusqlite"] }
+ bdk_wallet = { version = "=3.0.0", features = ["all-keys", "keys-bip39", "rusqlite"] }
  bdk_esplora = { version = "0.22.1", default-features = false, features = ["std", "blocking", "blocking-https-rustls"] }
  bdk_electrum = { version = "0.23.2", default-features = false, features = ["use-rustls-ring"] }
- bdk_kyoto = { version = "0.15.4" }
+ bdk_kyoto = { version = "0.16.0" }
 +tokio = { version = "1", features = ["rt-multi-thread"] }
  
  uniffi = { version = "=0.30.0", features = ["cli"]}
@@ -158,10 +45,10 @@ index 662ffe6..e9c33ea 100644
  panic = "abort"     # Abort on panic
  strip = "debuginfo" # Partially strip symbols from binary
 diff --git a/bdk-ffi/src/electrum.rs b/bdk-ffi/src/electrum.rs
-index 7b04952..7ef866f 100644
+index 8b0758e..20d6600 100644
 --- a/bdk-ffi/src/electrum.rs
 +++ b/bdk-ffi/src/electrum.rs
-@@ -6,146 +6,153 @@ use crate::types::{FullScanRequest, SyncRequest};
+@@ -6,152 +6,159 @@ use crate::types::{FullScanRequest, SyncRequest};
  use bdk_electrum::electrum_client::HeaderNotification as BdkHeaderNotification;
  use bdk_electrum::electrum_client::ServerFeaturesRes as BdkServerFeaturesRes;
  use bdk_electrum::BdkElectrumClient as BdkBdkElectrumClient;
@@ -189,9 +76,15 @@ index 7b04952..7ef866f 100644
  impl ElectrumClient {
      /// Creates a new bdk client from a electrum_client::ElectrumApi
      /// Optional: Set the proxy of the builder
-     #[uniffi::constructor(default(socks5 = None))]
-     pub fn new(url: String, socks5: Option<String>) -> Result<Self, ElectrumError> {
+     /// Optional: Set whether the server's TLS certificate is validated.
+     #[uniffi::constructor(default(socks5 = None, validate_domain = true))]
+     pub fn new(
+         url: String,
+         socks5: Option<String>,
+         validate_domain: bool,
+     ) -> Result<Self, ElectrumError> {
          let mut config = bdk_electrum::electrum_client::ConfigBuilder::new();
+         config = config.validate_domain(validate_domain);
          if let Some(socks5) = socks5 {
              config = config.socks5(Some(bdk_electrum::electrum_client::Socks5Config::new(
                  socks5.as_str(),

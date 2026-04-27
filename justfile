@@ -35,10 +35,17 @@ submodule-to-master:
   && git pull origin master
 
 [group("Submodule")]
+[doc("Regenerate the async-sync patch from the current submodule working tree.")]
+submodule-regen-patch:
+  cd ./bdk-ffi/ \
+  && git diff HEAD -- bdk-ffi/Cargo.toml bdk-ffi/src/lib.rs bdk-ffi/src/esplora.rs bdk-ffi/src/electrum.rs > ../patches/bdk-ffi-async-sync.patch
+
+[group("Submodule")]
 [doc("Apply the async-sync patch to the bdk-ffi submodule.")]
 submodule-apply-patch:
   cd ./bdk-ffi/ \
-  && git apply ../patches/bdk-ffi-async-sync.patch
+  && git reset --hard HEAD \
+  && git apply -C1 ../patches/bdk-ffi-async-sync.patch
 
 [group("Build")]
 [doc("Build the tarball for Android only.")]
