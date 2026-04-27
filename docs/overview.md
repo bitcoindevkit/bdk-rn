@@ -11,7 +11,7 @@ The code in this repository is mostly comprised of:
 - Tests
 - Docs
 
-The core Rust code that is exposed to the React Native language bindings actually resides in the [bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) repository. This repo pulls it in as a submodule.
+The core Rust code that is exposed to the React Native language bindings actually resides in the [bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) repository. This repo pulls it in as a submodule and applies a specialized [patch]() to it so that sync methods on the Electrum and Esplora clients become `async` when used on the JS side.
 
 ## Prerequisites
 
