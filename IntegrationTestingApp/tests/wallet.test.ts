@@ -8,6 +8,7 @@
 
 import {
   Network,
+  NetworkKind,
   Mnemonic,
   DescriptorSecretKey,
   Descriptor,
@@ -28,7 +29,7 @@ export function runWalletTests() {
 
       // Create descriptor secret key from mnemonic
       const secretKey = new DescriptorSecretKey(
-        Network.Signet,
+        NetworkKind.Test,
         mnemonic,
         undefined
       );
@@ -39,7 +40,7 @@ export function runWalletTests() {
       const descriptor = Descriptor.newBip86(
         secretKey,
         KeychainKind.External,
-        Network.Signet
+        NetworkKind.Test
       );
 
       expect(descriptor).toBeDefined();
@@ -73,14 +74,14 @@ export function runWalletTests() {
       // First wallet
       const mnemonic1 = Mnemonic.fromString(knownMnemonic);
       const secretKey1 = new DescriptorSecretKey(
-        Network.Signet,
+        NetworkKind.Test,
         mnemonic1,
         undefined
       );
       const descriptor1 = Descriptor.newBip86(
         secretKey1,
         KeychainKind.External,
-        Network.Signet
+        NetworkKind.Test
       );
       const persister1 = Persister.newInMemory();
       const wallet1 = Wallet.createSingle(
@@ -93,14 +94,14 @@ export function runWalletTests() {
       // Second wallet with same mnemonic
       const mnemonic2 = Mnemonic.fromString(knownMnemonic);
       const secretKey2 = new DescriptorSecretKey(
-        Network.Signet,
+        NetworkKind.Test,
         mnemonic2,
         undefined
       );
       const descriptor2 = Descriptor.newBip86(
         secretKey2,
         KeychainKind.External,
-        Network.Signet
+        NetworkKind.Test
       );
       const persister2 = Persister.newInMemory();
       const wallet2 = Wallet.createSingle(

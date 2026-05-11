@@ -10,6 +10,7 @@
 
 import {
   Network,
+  NetworkKind,
   Descriptor,
   Wallet,
   Persister,
@@ -31,11 +32,11 @@ export function runBackgroundSyncTests() {
     it('esplora sync does not block the JS thread', async () => {
       const externalDescriptor = new Descriptor(
         `wpkh(${TEST_EXTENDED_PRIVKEY}/${BIP84_TEST_RECEIVE_PATH}/*)`,
-        Network.Regtest
+        NetworkKind.Test
       );
       const changeDescriptor = new Descriptor(
         `wpkh(${TEST_EXTENDED_PRIVKEY}/${BIP84_TEST_CHANGE_PATH}/*)`,
-        Network.Regtest
+        NetworkKind.Test
       );
 
       const persister = Persister.newInMemory();

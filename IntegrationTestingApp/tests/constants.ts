@@ -2,7 +2,7 @@
  * Test constants ported from androidTest/kotlin/org/bitcoindevkit/Constants.kt
  */
 
-import { Descriptor, Network } from 'bdk-rn';
+import { Descriptor, NetworkKind } from 'bdk-rn';
 
 // Test networks
 export const TEST_EXTENDED_PRIVKEY =
@@ -20,27 +20,27 @@ export const BIP86_MAINNET_RECEIVE_PATH = '86h/0h/0h/1';
 
 export const BIP84_DESCRIPTOR = new Descriptor(
   `wpkh(${TEST_EXTENDED_PRIVKEY}/${BIP84_TEST_RECEIVE_PATH}/*)`,
-  Network.Testnet
+  NetworkKind.Test
 );
 export const BIP84_CHANGE_DESCRIPTOR = new Descriptor(
   `wpkh(${TEST_EXTENDED_PRIVKEY}/${BIP84_TEST_CHANGE_PATH}/*)`,
-  Network.Testnet
+  NetworkKind.Test
 );
 export const BIP86_DESCRIPTOR = new Descriptor(
   `tr(${TEST_EXTENDED_PRIVKEY}/${BIP86_TEST_RECEIVE_PATH}/*)`,
-  Network.Testnet
+  NetworkKind.Test
 );
 export const BIP86_CHANGE_DESCRIPTOR = new Descriptor(
   `tr(${TEST_EXTENDED_PRIVKEY}/${BIP86_TEST_CHANGE_PATH}/*)`,
-  Network.Testnet
+  NetworkKind.Test
 );
 export const NON_EXTENDED_DESCRIPTOR_0 = new Descriptor(
   `wpkh(${TEST_EXTENDED_PRIVKEY}/${BIP84_TEST_RECEIVE_PATH}/0)`,
-  Network.Testnet
+  NetworkKind.Test
 );
 export const NON_EXTENDED_DESCRIPTOR_1 = new Descriptor(
   `wpkh(${TEST_EXTENDED_PRIVKEY}/${BIP84_TEST_RECEIVE_PATH}/1)`,
-  Network.Testnet
+  NetworkKind.Test
 );
 
 // Using the MNEMONIC_AWESOME
@@ -49,5 +49,5 @@ export const TEST_EXTENDED_PRIVKEY_0 =
 export const BIP84_TEST_RECEIVE_PATH_0 = '84h/1h/0h/0';
 export const TEST_BIP84_DESCRIPTOR_0 = new Descriptor(
   `wpkh(${TEST_EXTENDED_PRIVKEY_0}/${BIP84_TEST_RECEIVE_PATH_0}/*)`,
-  Network.Regtest
+  NetworkKind.Test
 );

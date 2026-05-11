@@ -11,7 +11,7 @@ import {
   WordCount,
   DescriptorSecretKey,
   Descriptor,
-  Network,
+  NetworkKind,
   KeychainKind,
 } from 'bdk-rn';
 import { describe, it, expect } from './testRunner';
@@ -69,14 +69,14 @@ export function runMnemonicTests() {
         'space echo position wrist orient erupt relief museum myself grain wisdom tumble'
       );
       const descriptorSecretKey = new DescriptorSecretKey(
-        Network.Testnet,
+        NetworkKind.Test,
         mnemonic,
         undefined
       );
       const descriptor = Descriptor.newBip86(
         descriptorSecretKey,
         KeychainKind.External,
-        Network.Testnet
+        NetworkKind.Test
       );
 
       expect(descriptor.toString()).toBe(
