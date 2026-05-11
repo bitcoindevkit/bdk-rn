@@ -1,0 +1,31 @@
+diff --git a/bdk-ffi/src/lib.rs b/bdk-ffi/src/lib.rs
+index 1693ff3..ac5cbb5 100644
+--- a/bdk-ffi/src/lib.rs
++++ b/bdk-ffi/src/lib.rs
+@@ -16,5 +16,26 @@ mod tests;
+ 
+ use crate::bitcoin::FeeRate;
+ use crate::bitcoin::OutPoint;
++use std::sync::LazyLock;
+ 
+ uniffi::setup_scaffolding!("bdk");
++
++/// Global Tokio runtime for async methods.
++pub static RUNTIME: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {
++    tokio::runtime::Builder::new_multi_thread()
++        .enable_all()
++        .build()
++        .expect("Failed to create Tokio runtime")
++});
++
++/// Run a future on the global Tokio runtime as a proper task.
++/// uniffi polls Rust futures without a Tokio runtime context; spawning via
++/// RUNTIME.spawn() ensures spawn_blocking and async I/O inside the future
++/// work correctly, because the inner future runs inside the Tokio runtime.
++pub async fn run_async<F, T>(future: F) -> T
++where
++    F: std::future::Future<Output = T> + Send + 'static,
++    T: Send + 'static,
++{
++    RUNTIME.spawn(future).await.expect("Tokio task panicked")
++}
