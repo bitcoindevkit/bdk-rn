@@ -35,17 +35,23 @@ submodule-to-master:
   && git pull origin master
 
 [group("Submodule")]
-[doc("Regenerate the async-sync patch from the current submodule working tree.")]
+[doc("Regenerate the async-sync patches from the current submodule working tree.")]
 submodule-regen-patch:
   cd ./bdk-ffi/ \
-  && git diff HEAD -- bdk-ffi/Cargo.toml bdk-ffi/src/lib.rs bdk-ffi/src/esplora.rs bdk-ffi/src/electrum.rs > ../patches/bdk-ffi-async-sync.patch
+  && git diff --unified=3 HEAD -- bdk-ffi/Cargo.toml > ../patches/bdk-ffi-async-sync-cargo.patch \
+  && git diff --unified=3 HEAD -- bdk-ffi/src/lib.rs > ../patches/bdk-ffi-async-sync-lib.patch \
+  && git diff --unified=3 HEAD -- bdk-ffi/src/esplora.rs > ../patches/bdk-ffi-async-sync-esplora.patch \
+  && git diff --unified=3 HEAD -- bdk-ffi/src/electrum.rs > ../patches/bdk-ffi-async-sync-electrum.patch
 
 [group("Submodule")]
-[doc("Apply the async-sync patch to the bdk-ffi submodule.")]
+[doc("Apply the async-sync patches to the bdk-ffi submodule.")]
 submodule-apply-patch:
   cd ./bdk-ffi/ \
   && git reset --hard HEAD \
-  && git apply -C1 ../patches/bdk-ffi-async-sync.patch
+  && git apply -C1 ../patches/bdk-ffi-async-sync-cargo.patch \
+  && git apply -C1 ../patches/bdk-ffi-async-sync-lib.patch \
+  && git apply -C1 ../patches/bdk-ffi-async-sync-esplora.patch \
+  && git apply -C1 ../patches/bdk-ffi-async-sync-electrum.patch
 
 [group("Build")]
 [doc("Build the tarball for Android only.")]
