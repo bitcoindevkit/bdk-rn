@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Button,
   ScrollView,
+  Platform,
 } from 'react-native';
 import {
   Network,
@@ -23,6 +24,11 @@ import {
 // Hardcoded mnemonic for demo purposes only — never use this in production.
 const DEMO_MNEMONIC =
   'awesome awesome awesome awesome awesome awesome awesome awesome awesome awesome awesome awesome';
+
+// Android emulator reaches the host machine via 10.0.2.2; iOS simulator uses localhost.
+const ELECTRUM_URL = Platform.OS === 'android'
+  ? 'tcp://10.0.2.2:60401'
+  : 'tcp://localhost:60401';
 
 export default function App() {
   const [address, setAddress] = useState<string>('');
@@ -43,7 +49,7 @@ export default function App() {
       const secretKey = new DescriptorSecretKey(NetworkKind.Test, mnemonic, undefined);
       const descriptor = Descriptor.newBip86(secretKey, KeychainKind.External, NetworkKind.Test);
       const persister = Persister.newInMemory();
-      const wallet = Wallet.createSingle(descriptor, Network.Signet, persister);
+      const wallet = Wallet.createSingle(descriptor, Network.Regtest, persister);
 
       walletRef.current = wallet as unknown as Wallet;
 
@@ -65,7 +71,7 @@ export default function App() {
     setLog('Connecting to Electrum...');
 
     try {
-      const client = new ElectrumClient('ssl://mempool.space:60602');
+      const client = new ElectrumClient(ELECTRUM_URL);
       const fullScanRequest = walletRef.current.startFullScan().build();
 
       setLog('Scanning...');
@@ -103,7 +109,7 @@ export default function App() {
 
         <View style={styles.card}>
           <Text style={styles.label}>Network</Text>
-          <Text style={styles.value}>Signet</Text>
+          <Text style={styles.value}>Regtest</Text>
 
           <Text style={styles.label}>Address</Text>
           <Text style={styles.address}>{address}</Text>
