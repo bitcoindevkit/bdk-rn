@@ -4,6 +4,12 @@
   just --list --unsorted
 
 [group("Test")]
+[doc("Remove all build artifacts and installed dependencies.")]
+clean:
+  rm -rf node_modules/
+  rm -rf android/build/
+
+[group("Test")]
 [doc("Run the tests on the Android application.")]
 test-android:
   rm -rf node_modules/bdk-rn

@@ -1,6 +1,6 @@
 # Running Integration Tests in CI
 
-The IntegrationTestingApp runs tests on app launch and prints results to console, making it perfect for CI/CD pipelines.
+The tests runs tests on app launch and prints results to console, making it perfect for CI/CD pipelines.
 
 ## Console Output Format
 
@@ -51,7 +51,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: IntegrationTestingApp
+        working-directory: tests
         run: npm install
 
       - name: Start Android Emulator
@@ -61,7 +61,7 @@ jobs:
           target: google_apis
           arch: x86_64
           script: |
-            cd IntegrationTestingApp
+            cd tests
             npm run android 2>&1 | tee test-output.log &
 
             # Wait for app to launch and tests to run
@@ -120,7 +120,7 @@ echo "All tests passed!"
 Run tests locally and capture output:
 
 ```bash
-cd IntegrationTestingApp
+cd tests
 
 # Android
 npm run android 2>&1 | tee test-output.log

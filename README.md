@@ -46,7 +46,7 @@ just build-tarball
 
 ### Running the Test Suite
 
-The `IntegrationTestingApp/` directory contains a standalone test app that uses the library as a tarball dependency (similar to how end-users would consume it). This app is **not** part of the workspace and is completely decoupled from the library development.
+The `tests/` directory contains a standalone test app that uses the library as a tarball dependency (similar to how end-users would consume it). This app is **not** part of the workspace and is completely decoupled from the library development.
 
 You can use the following workflow to run the tests locally on an Android emulator, or to develop features on the library by first making changes to the local `bdk-ffi` repository and then running through the workflow with new/modified tests.
 
@@ -57,8 +57,8 @@ just build-android
 # Create the tarball bdk-rn-<version>-next.tgz
 npm pack
 
-# Install dependencies in the IntegrationTestingApp
-cd IntegrationTestingApp
+# Install dependencies in the tests
+cd tests
 
 # Make sure your package.json file references the ../bdk-rn-<version>-next.tgz
 npm install
@@ -74,6 +74,6 @@ npm run android
 
 1. Make changes to `bdk-ffi` or the library code
 2. Build and package: `just build-android && npm pack`
-3. Update IntegrationTestingApp: `cd IntegrationTestingApp && npm install`
-4. Add or modify tests in the IntegrationTestingApp
+3. Update tests: `cd tests && npm install`
+4. Add or modify tests in the tests
 5. Run the app and verify test results in logcat or in the emulator

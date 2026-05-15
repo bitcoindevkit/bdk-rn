@@ -75,7 +75,7 @@ temp/
 tests.log
 
 # Development and testing
-IntegrationTestingApp/
+tests/
 .github/
 .git/
 .claude/
