@@ -13,5 +13,5 @@ clean:
 [doc("Run the tests on the Android application.")]
 test-android:
   rm -rf node_modules/bdk-rn
-  npm install
-  npm run android
+  pnpm install
+  pnpm run android
