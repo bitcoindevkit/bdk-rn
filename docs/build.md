@@ -14,9 +14,6 @@ You can easily build the library from source for quick development and iteration
 git clone git@github.com:bitcoindevkit/bdk-rn.git
 cd bdk-rn
 
-# Install JS dependencies
-yarn install
-
 # Install compilation targets
 rustup target add aarch64-linux-android aarch64-apple-ios aarch64-apple-ios-sim
 

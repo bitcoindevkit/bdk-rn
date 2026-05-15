@@ -91,7 +91,7 @@
     "react": "*",
     "react-native": "*"
   },
-  "packageManager": "yarn@3.6.1",
+  "packageManager": "pnpm@10.27.0",
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [

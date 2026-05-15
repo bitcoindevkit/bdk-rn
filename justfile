@@ -14,7 +14,9 @@ clean:
   rm -rf ./cpp/
   rm -rf ./src/generated/
   rm -rf ./lib/
+  rm -rf ./node_modules/
   rm -rf ./bdk-ffi/bdk-ffi/target/
+  rm -f ./*.tgz
 
 [group("Submodule")]
 [doc("Initialize bdk-ffi submodule to committed hash.")]
@@ -56,21 +58,24 @@ submodule-apply-patch:
 [group("Build")]
 [doc("Build the tarball for Android only.")]
 build-tarball-android:
-  yarn ubrn:android --config ubrn.config.yaml
-  npm pack
+  pnpm install --ignore-scripts
+  pnpm ubrn:android --config ubrn.config.yaml
+  pnpm pack
 
 [group("Build")]
 [doc("Build the tarball for iOS only.")]
 build-tarball-ios:
-  yarn ubrn:ios --config ubrn.config.yaml
-  npm pack
+  pnpm install --ignore-scripts
+  pnpm ubrn:ios --config ubrn.config.yaml
+  pnpm pack
 
 [group("Build")]
 [doc("Build the release tarball with ready for both iOS and Android.")]
 build-tarball:
-  yarn ubrn:android --config ubrn.config.yaml
-  yarn ubrn:ios --config ubrn.config.yaml
-  npm pack
+  pnpm install --ignore-scripts
+  pnpm ubrn:android --config ubrn.config.yaml
+  pnpm ubrn:ios --config ubrn.config.yaml
+  pnpm pack
 
 [group("Docs")]
 [doc("Serve the docs locally.")]
