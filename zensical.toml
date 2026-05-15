@@ -38,6 +38,7 @@ nav = [
     { "Notes" = "notes.md" },
   ]},
   { "Example Apps" = [
+    { "About" = "examples/about.md" },
     { "Android" = "examples/android.md" },
     { "iOS" = "examples/ios.md" },
   ]},

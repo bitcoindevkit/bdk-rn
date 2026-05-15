@@ -14,6 +14,9 @@ You can easily build the library from source for quick development and iteration
 git clone git@github.com:bitcoindevkit/bdk-rn.git
 cd bdk-rn
 
+# Install JS dependencies
+yarn install
+
 # Install compilation targets
 rustup target add aarch64-linux-android aarch64-apple-ios aarch64-apple-ios-sim
 
@@ -38,6 +41,9 @@ just build-tarball-android
 # Make sure your package.json file references the ../bdk-rn-<version>-next.tgz
 # Start an Android emulator
 cd IntegrationTestingApp
+
+# Install JS dependencies
+npm install
 
 # Terminal 1: Monitor the logs
 adb logcat -c && adb logcat -s ReactNativeJS | tee tests.log
