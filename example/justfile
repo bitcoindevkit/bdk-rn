@@ -9,3 +9,11 @@ install:
 [doc("Run the example app on Android.")]
 run-android:
   pnpm run android
+
+[doc("Install iOS CocoaPods dependencies.")]
+pod-install:
+  cd ios && pod install
+
+[doc("Run the example app on an iOS simulator.")]
+run-ios:
+  pnpm run ios
