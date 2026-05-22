@@ -11,11 +11,10 @@
 **Prerequisite:** CocoaPods >= `1.13` (`brew install cocoapods` should do it). 
 
 ```shell
+# 1. Don't forget to add the tarball at the root of the repo (https://github.com/bitcoindevkit/bdk-rn/releases)
+
 cd example/
-# Don't forget to add the tarball at the root of the repo
-# https://github.com/bitcoindevkit/bdk-rn/releases
-npm install
-cd ios/
-pod install
-npm run ios
+just install
+just pod-install
+just run-ios
 ```

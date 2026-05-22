@@ -9,10 +9,10 @@
 </div>
 
 ```shell
+# 1. Start an Android emulator
+# 2. Don't forget to add the tarball at the root of the repo (https://github.com/bitcoindevkit/bdk-rn/releases)
+
 cd example/
-# Don't forget to add the tarball at the root of the repo
-# https://github.com/bitcoindevkit/bdk-rn/releases
-npm install
-# Start an Android emulator
-npm run android
+just install
+just run-android
 ```
