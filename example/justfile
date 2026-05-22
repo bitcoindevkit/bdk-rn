@@ -2,6 +2,10 @@
 @list:
   just --list --unsorted
 
+[doc("Install example app dependencies.")]
+install:
+  pnpm install --ignore-workspace
+
 [doc("Run the example app on Android.")]
 run-android:
-  npm run android
+  pnpm run android

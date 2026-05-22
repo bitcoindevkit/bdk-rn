@@ -16,6 +16,8 @@ clean:
   rm -rf ./lib/
   rm -rf ./node_modules/
   rm -rf ./bdk-ffi/bdk-ffi/target/
+  rm -rf ./BdkRnFramework.xcframework/
+  rm -rf ./site/
   rm -f ./*.tgz
 
 [group("Submodule")]
