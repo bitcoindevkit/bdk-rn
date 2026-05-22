@@ -1,8 +1,8 @@
 diff --git a/bdk-ffi/src/electrum.rs b/bdk-ffi/src/electrum.rs
-index bdb080f..a85eb14 100644
+index 57288c1..6106bd4 100644
 --- a/bdk-ffi/src/electrum.rs
 +++ b/bdk-ffi/src/electrum.rs
-@@ -23,7 +23,7 @@ use std::sync::Arc;
+@@ -24,7 +24,7 @@ use std::time::Duration;
  /// Wrapper around an electrum_client::ElectrumApi which includes an internal in-memory transaction
  /// cache to avoid re-fetching already downloaded transactions.
  #[derive(uniffi::Object)]
@@ -11,7 +11,7 @@ index bdb080f..a85eb14 100644
  
  #[uniffi::export]
  impl ElectrumClient {
-@@ -46,7 +46,7 @@ impl ElectrumClient {
+@@ -57,7 +57,7 @@ impl ElectrumClient {
          let inner_client =
              bdk_electrum::electrum_client::Client::from_config(url.as_str(), config.build())?;
          let client = BdkBdkElectrumClient::new(inner_client);
@@ -20,7 +20,7 @@ index bdb080f..a85eb14 100644
      }
  
      /// Full scan the keychain scripts specified with the blockchain (via an Electrum client) and
-@@ -64,7 +64,7 @@ impl ElectrumClient {
+@@ -75,7 +75,7 @@ impl ElectrumClient {
      ///   `Wallet.calculate_fee` and `Wallet.calculate_fee_rate` will return a
      ///   `CalculateFeeError::MissingTxOut` error if those TxOuts are not present in the transaction
      ///   graph.
@@ -29,7 +29,7 @@ index bdb080f..a85eb14 100644
          &self,
          request: Arc<FullScanRequest>,
          stop_gap: u64,
-@@ -79,20 +79,22 @@ impl ElectrumClient {
+@@ -90,20 +90,22 @@ impl ElectrumClient {
              .take()
              .ok_or(ElectrumError::RequestAlreadyConsumed)?;
  
@@ -65,7 +65,7 @@ index bdb080f..a85eb14 100644
      }
  
      /// Sync a set of scripts with the blockchain (via an Electrum client) for the data specified and returns updates for bdk_chain data structures.
-@@ -110,7 +112,7 @@ impl ElectrumClient {
+@@ -121,7 +123,7 @@ impl ElectrumClient {
      ///
      /// If the scripts to sync are unknown, such as when restoring or importing a keychain that may
      /// include scripts that have been used, use full_scan with the keychain.
@@ -74,14 +74,19 @@ index bdb080f..a85eb14 100644
          &self,
          request: Arc<SyncRequest>,
          batch_size: u64,
-@@ -124,17 +126,22 @@ impl ElectrumClient {
+@@ -135,17 +137,22 @@ impl ElectrumClient {
              .take()
              .ok_or(ElectrumError::RequestAlreadyConsumed)?;
  
 -        let sync_result: BdkSyncResponse =
 -            self.0
 -                .sync(request, batch_size as usize, fetch_prev_txouts)?;
--
++        let client = Arc::clone(&self.0);
++        crate::run_async(async move {
++            tokio::task::spawn_blocking(move || -> Result<Arc<Update>, ElectrumError> {
++                let result: BdkSyncResponse =
++                    client.sync(request, batch_size as usize, fetch_prev_txouts)?;
+ 
 -        let update = BdkUpdate {
 -            last_active_indices: BTreeMap::default(),
 -            tx_update: sync_result.tx_update,
@@ -89,12 +94,6 @@ index bdb080f..a85eb14 100644
 -        };
 -
 -        Ok(Arc::new(Update(update)))
-+        let client = Arc::clone(&self.0);
-+        crate::run_async(async move {
-+            tokio::task::spawn_blocking(move || -> Result<Arc<Update>, ElectrumError> {
-+                let result: BdkSyncResponse =
-+                    client.sync(request, batch_size as usize, fetch_prev_txouts)?;
-+
 +                Ok(Arc::new(Update(BdkUpdate {
 +                    last_active_indices: BTreeMap::default(),
 +                    tx_update: result.tx_update,
