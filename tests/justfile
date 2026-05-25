@@ -10,8 +10,8 @@ clean:
   rm -rf android/build/
 
 [group("Test")]
-[doc("Run the tests on the Android application.")]
+[doc("Run the tests on the Android application (needs a running emulator).")]
 test-android:
   rm -rf node_modules/bdk-rn
-  pnpm install
+  pnpm install --ignore-workspace
   pnpm run android
