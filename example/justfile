@@ -2,6 +2,18 @@
 @list:
   just --list --unsorted
 
+[group("Test")]
+[doc("Remove all build artifacts and installed dependencies.")]
+clean:
+  rm -rf node_modules
+  rm -rf .expo/
+  rm -rf ios/build/
+  rm -rf ios/Pods/
+  rm -rf android/.gradle/
+  rm -rf android/build/
+  rm -rf android/app/build/
+  rm -rf android/app/.cxx/
+
 [doc("Install example app dependencies.")]
 install:
   pnpm install --ignore-workspace

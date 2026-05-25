@@ -1,5 +1,5 @@
 PODS:
-  - BdkRn (3.0.0-rc.2):
+  - BdkRn (3.0.0-rc.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1718,7 +1718,7 @@ PODS:
   - Yoga (0.0.0)
 
 DEPENDENCIES:
-  - "BdkRn (from `../node_modules/.pnpm/bdk-rn@file+..+bdk-rn-3.0.0-rc.2.tgz_react-native@0.81.5_@babel+core@7.29.0_react@19.1.0__react@19.1.0/node_modules/bdk-rn`)"
+  - "BdkRn (from `../node_modules/.pnpm/bdk-rn@file+..+bdk-rn-3.0.0-rc.3.tgz_react-native@0.81.5_@babel+core@7.29.0_react@19.1.0__react@19.1.0/node_modules/bdk-rn`)"
   - "EXConstants (from `../node_modules/.pnpm/expo-constants@18.0.13_expo@54.0.34_@babel+core@7.29.0_react-native@0.81.5_@babel+core@_09cd1d366e949e8b081a780c0bd7828e/node_modules/expo-constants/ios`)"
   - "Expo (from `../node_modules/.pnpm/expo@54.0.34_@babel+core@7.29.0_react-native@0.81.5_@babel+core@7.29.0_react@19.1.0__react@19.1.0/node_modules/expo`)"
   - "ExpoAsset (from `../node_modules/.pnpm/expo-asset@12.0.13_expo@54.0.34_@babel+core@7.29.0_react-native@0.81.5_@babel+core@7.29_593f5f9c90cd3e320c6ce3e3b0d18d6a/node_modules/expo-asset/ios`)"
@@ -1798,7 +1798,7 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   BdkRn:
-    :path: "../node_modules/.pnpm/bdk-rn@file+..+bdk-rn-3.0.0-rc.2.tgz_react-native@0.81.5_@babel+core@7.29.0_react@19.1.0__react@19.1.0/node_modules/bdk-rn"
+    :path: "../node_modules/.pnpm/bdk-rn@file+..+bdk-rn-3.0.0-rc.3.tgz_react-native@0.81.5_@babel+core@7.29.0_react@19.1.0__react@19.1.0/node_modules/bdk-rn"
   EXConstants:
     :path: "../node_modules/.pnpm/expo-constants@18.0.13_expo@54.0.34_@babel+core@7.29.0_react-native@0.81.5_@babel+core@_09cd1d366e949e8b081a780c0bd7828e/node_modules/expo-constants/ios"
   Expo:
@@ -1952,7 +1952,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.29.0_react@19.1.0/node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  BdkRn: 3ae8e26dd6c5c010bb46092fabbea76a05fc7654
+  BdkRn: 105f3c400fa941a0c79ae8f8ac09f839eb44d421
   EXConstants: fce59a631a06c4151602843667f7cfe35f81e271
   Expo: 514ae3ec54a086aab509f255abfbf37be0fcc0e2
   ExpoAsset: 9e5a7c9c0a9fb83ad5b2bb365141f2bd7f289b66
