@@ -11,7 +11,7 @@ clean:
 
 [group("Test")]
 [doc("Run the tests on the Android application (needs a running emulator).")]
-test-android:
+test:
   rm -rf node_modules/bdk-rn
   pnpm install --ignore-workspace
   pnpm run android
