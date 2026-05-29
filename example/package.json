@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "bdk-rn": "file:../bdk-rn-3.0.0-rc.3.tgz",
+    "bdk-rn": "file:../bdk-rn-1.0.0.tgz",
     "expo": "~54.0.33",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
