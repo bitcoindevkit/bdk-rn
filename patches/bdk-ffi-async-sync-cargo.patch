@@ -1,12 +1,12 @@
 diff --git a/bdk-ffi/Cargo.toml b/bdk-ffi/Cargo.toml
-index b97e4af..6bd0771 100644
+index 89b09fc..c38a11a 100644
 --- a/bdk-ffi/Cargo.toml
 +++ b/bdk-ffi/Cargo.toml
 @@ -1,5 +1,5 @@
  [package]
 -name = "bdk-ffi"
 +name = "bdkffi"
- version = "3.0.0-rc.3"
+ version = "3.0.0"
  homepage = "https://bitcoindevkit.org"
  repository = "https://github.com/bitcoindevkit/bdk"
 @@ -21,6 +21,7 @@ bdk_electrum = { version = "0.24.0", default-features = false, features = ["use-
