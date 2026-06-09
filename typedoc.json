@@ -1,0 +1,27 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/generated/bdk.ts"],
+  "out": "site/api",
+  "name": "bdk-rn API Reference",
+  "readme": "typedoc-readme.md",
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeExternals": true,
+  "exclude": [
+    "**/FfiConverter*",
+    "**/uniffiInit*",
+    "**/UniffiLib*",
+    "**/RustBuffer*",
+    "**/LiftReturn*",
+    "**/Lower*"
+  ],
+  "navigationLinks": {
+    "GitHub": "https://github.com/bitcoindevkit/bdk-rn",
+    "BDK Docs": "https://bitcoindevkit.org"
+  },
+  "tsconfig": "tsconfig.json",
+  "skipErrorChecking": true,
+  "includeVersion": true,
+  "sort": ["source-order"]
+}

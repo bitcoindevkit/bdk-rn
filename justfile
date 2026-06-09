@@ -80,6 +80,17 @@ build-tarball:
   pnpm pack
 
 [group("Docs")]
+[doc("Generate API reference docs. Requires: just submodule-apply-patch && pnpm ubrn:android first.")]
+api-docs:
+  ./node_modules/.bin/typedoc
+
+[group("Docs")]
+[doc("Build full documentation site (Zensical guides + TypeDoc API reference).")]
+docs-build:
+  uv run zensical build
+  ./node_modules/.bin/typedoc
+
+[group("Docs")]
 [doc("Serve the docs locally.")]
 docs:
   uv run zensical serve
