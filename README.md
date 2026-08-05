@@ -13,12 +13,29 @@ The core Rust code that is exposed to the React Native language bindings actuall
 
 ## Installing
 
+1. Install the package
+
 ```shell
 npm install bdk-rn
 # or in an Expo project
 npx expo install bdk-rn
 ```
 
+2. In an Expo project, make sure the plugin is in `app.json`, and run `prebuild`.
+
+```json
+{
+  "expo": {
+    "plugins": ["bdk-rn"]
+  }
+}
+```
+
+```bash
+npx expo prebuild
+```
+
+Warning: If you are using pnpm v10+, run pnpm approve-builds and select `bdk-rn` to allow the postinstall script to download the prebuilt native binaries.
 
 ## Exploring the Example Apps
 
