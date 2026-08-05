@@ -80,6 +80,12 @@ nitrogen/
 target/
 libbdkffi.a
 
+# Prebuilt native artifacts (built by CI, downloaded by scripts/postinstall.js)
+android/src/main/jniLibs/
+android-artifacts.zip
+ios-artifacts.zip
+checksums.json
+
 # Other
 temp/
 

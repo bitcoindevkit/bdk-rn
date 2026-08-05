@@ -20,7 +20,9 @@
     "cpp",
     "*.podspec",
     "BdkRnFramework.xcframework",
-    "react-native.config.js",
+    "app.plugin.js",
+    "plugin",
+    "scripts",
     "!ios/build",
     "!android/build",
     "!android/gradle",
@@ -42,7 +44,12 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build lib",
     "prepare": "bob build",
+    "postinstall": "node scripts/postinstall.js",
     "release": "release-it --only-version"
+  },
+  "checksums": {
+    "android": "",
+    "ios": ""
   },
   "keywords": [
     "react-native",
@@ -64,6 +71,7 @@
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.6.0",
+    "@expo/config-plugins": "^54.0.5",
     "@eslint/compat": "^1.2.7",
     "@eslint/eslintrc": "^3.3.0",
     "@eslint/js": "^9.22.0",
@@ -175,6 +183,6 @@
     "version": "0.52.0"
   },
   "dependencies": {
-    "uniffi-bindgen-react-native": "git+https://github.com/jhugman/uniffi-bindgen-react-native.git#0.30.0-1"
+    "uniffi-bindgen-react-native": "0.30.0-1"
   }
 }

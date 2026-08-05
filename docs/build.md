@@ -5,7 +5,7 @@ You can easily build the library from source for quick development and iteration
 - Rust toolchain (stable 1.91.1)
 - `just` CLI tool: https://github.com/casey/just
 - `cargo-ndk` (`cargo install cargo-ndk`)
-- For iOS: CocoaPods >= 1.13: ()`brew install cocoapods`)
+- For iOS: CocoaPods >= 1.13 (`brew install cocoapods`)
 
 ### Build Instructions
 
@@ -15,7 +15,11 @@ git clone git@github.com:bitcoindevkit/bdk-rn.git
 cd bdk-rn
 
 # Install compilation targets
-rustup target add aarch64-linux-android aarch64-apple-ios aarch64-apple-ios-sim
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android \
+  aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
+
+# Initialize the bdk-ffi submodule
+just submodule-init
 
 # Apply the patch to the submodule (required for async Electrum and Esplora methods)
 just submodule-apply-patch
@@ -55,7 +59,7 @@ just test-android
 ## Test Development Workflow
 
 1. Make changes to `bdk-ffi` or the library code
-2. Build and package: `just build-android && npm pack`
+2. Build and package: `just build-tarball-android`
 3. Update tests: `cd tests && npm install`
 4. Add or modify tests in the tests
 5. Run the app and verify test results in logcat or in the emulator

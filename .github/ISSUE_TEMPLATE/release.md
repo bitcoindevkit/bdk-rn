@@ -17,7 +17,7 @@ cd bdk-ffi/
 git fetch --all
 git checkout <tag>
 cd ..
-just apply-submodule-patches
+just submodule-apply-patch
 just clean
 just build-tarball
 cd tests/
@@ -30,15 +30,18 @@ just pod-install
 just run-ios
 ```
 
-- [ ] Create the tag
-- [ ] Build the tarball
-- [ ] Sign the artifact
-- [ ] Create the release on GitHub
-- [ ] Let people know!
+- [ ] Bump the version in `package.json` and merge it
+- [ ] Create and push the signed tag, pointing at the commit with the bumped
+      version (the workflow fails if the tag and `package.json` disagree).
+      This triggers the release workflow, which builds the binaries, creates
+      the GitHub Release with checksums, and publishes to npm
 
 ```shell
 git tag v1.1.0 --sign --edit
 git push upstream v1.1.0
 ```
+
+- [ ] Verify the release workflow succeeded (GitHub Release assets + npm)
+- [ ] Let people know!
 
 - [ ] Bump the `next` version on `master`
