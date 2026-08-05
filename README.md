@@ -11,6 +11,15 @@ The code in this repository is mostly comprised of:
 
 The core Rust code that is exposed to the React Native language bindings actually resides in the [bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) repository. This repo pulls it in as a submodule.
 
+## Installing
+
+```shell
+npm install bdk-rn
+# or in an Expo project
+npx expo install bdk-rn
+```
+
+
 ## Exploring the Example Apps
 
 To take a look at the API exposed in this library, you can run our example applications. [Read the docs on this here](https://bitcoindevkit.github.io/bdk-rn/example-apps/), and [find our example apps here](https://github.com/thunderbiscuit/bdk-rn-example-apps).
@@ -26,7 +35,7 @@ You can easily build the library from source for quick development and iteration
 - Rust toolchain (stable 1.91.1)
 - `just` CLI tool: https://github.com/casey/just
 - `cargo-ndk` (`cargo install cargo-ndk`)
-- For iOS: CocoaPods >= 1.13: ()`brew install cocoapods`)
+- For iOS: CocoaPods >= 1.13 (`brew install cocoapods`)
 
 ### Build Instructions
 
@@ -36,11 +45,14 @@ git clone git@github.com:bitcoindevkit/bdk-rn.git
 cd bdk-rn
 
 # Install compilation targets
-rustup target add aarch64-linux-android aarch64-apple-ios aarch64-apple-ios-sim
+rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android \
+  aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 
-# Build the library and create tarball (includes both Android and iOS)
-just rename-library
-# Build both platforms and creates bdk-rn-VERSION.tgz
+# Initialize the bdk-ffi submodule and apply the async-sync patches
+just submodule-init
+just submodule-apply-patch
+
+# Build both platforms and create the bdk-rn-VERSION.tgz tarball
 just build-tarball
 ```
 
@@ -52,10 +64,7 @@ You can use the following workflow to run the tests locally on an Android emulat
 
 ```shell
 # Build and package the library
-just build-android
-
-# Create the tarball bdk-rn-<version>-next.tgz
-npm pack
+just build-tarball-android
 
 # Install dependencies in the tests
 cd tests
@@ -73,7 +82,7 @@ npm run android
 ### Test Development Workflow
 
 1. Make changes to `bdk-ffi` or the library code
-2. Build and package: `just build-android && npm pack`
+2. Build and package: `just build-tarball-android`
 3. Update tests: `cd tests && npm install`
 4. Add or modify tests in the tests
 5. Run the app and verify test results in logcat or in the emulator

@@ -5,8 +5,12 @@ rust:
 android:
   targets:
     - arm64-v8a
+    - armeabi-v7a
+    - x86
+    - x86_64
 
 ios:
   targets:
     - aarch64-apple-ios
     - aarch64-apple-ios-sim
+    - x86_64-apple-ios

@@ -1,0 +1,227 @@
+name: Release
+# Builds the prebuilt native binaries, attaches them to a GitHub Release,
+# and publishes the package to npm. Triggered by pushing a version tag:
+#
+#   git tag v1.1.0 --sign --edit
+#   git push upstream v1.1.0
+#
+# npm publishing uses trusted publishing (OIDC): the repository must be
+# configured as a trusted publisher for the package on npmjs.com. No npm
+# token secret is required.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Verify tag matches package.json version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$GITHUB_REF_NAME" != "v$VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $VERSION" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+  build-android:
+    runs-on: ubuntu-latest
+    needs: check-version
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Install just
+        run: sudo apt-get update && sudo apt-get install -y just
+
+      - name: Apply bdk-ffi patches
+        run: just submodule-apply-patch
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@1fbea72663f6d4c03efaab13560c8a24cfd2a7cc # v1.9.0
+        with:
+          toolchain: 1.91.1
+          target: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: bdk-ffi/bdk-ffi
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Build Android binaries and generate bindings
+        run: pnpm ubrn:android --config ubrn.config.yaml
+
+      - name: Package Android artifacts
+        run: zip -r android-artifacts.zip android/src/main/jniLibs cpp src/generated
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-artifacts
+          path: android-artifacts.zip
+          if-no-files-found: error
+
+  build-ios:
+    runs-on: macos-latest
+    needs: check-version
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Install just
+        run: brew install just
+
+      - name: Apply bdk-ffi patches
+        run: just submodule-apply-patch
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@1fbea72663f6d4c03efaab13560c8a24cfd2a7cc # v1.9.0
+        with:
+          toolchain: 1.91.1
+          target: aarch64-apple-ios,aarch64-apple-ios-sim,x86_64-apple-ios
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: bdk-ffi/bdk-ffi
+
+      - name: Build iOS binaries and generate bindings
+        run: pnpm ubrn:ios --config ubrn.config.yaml
+
+      - name: Package iOS artifacts
+        run: zip -r ios-artifacts.zip BdkRnFramework.xcframework cpp src/generated
+
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-artifacts
+          path: ios-artifacts.zip
+          if-no-files-found: error
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [check-version, build-android, build-ios]
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    outputs:
+      android_checksum: ${{ steps.checksums.outputs.android }}
+      ios_checksum: ${{ steps.checksums.outputs.ios }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: '*-artifacts'
+          merge-multiple: true
+
+      - name: Compute checksums
+        id: checksums
+        run: |
+          ANDROID_CHECKSUM=$(sha256sum android-artifacts.zip | cut -d' ' -f1)
+          IOS_CHECKSUM=$(sha256sum ios-artifacts.zip | cut -d' ' -f1)
+          echo "android=$ANDROID_CHECKSUM" >> "$GITHUB_OUTPUT"
+          echo "ios=$IOS_CHECKSUM" >> "$GITHUB_OUTPUT"
+          jq -n --arg android "$ANDROID_CHECKSUM" --arg ios "$IOS_CHECKSUM" \
+            '{android: $android, ios: $ios}' > checksums.json
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        with:
+          subject-path: |
+            android-artifacts.zip
+            ios-artifacts.zip
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          TAG="$GITHUB_REF_NAME"
+          # Releases are immutable: re-uploading assets would break checksum
+          # verification for versions already published to npm.
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG already exists; refusing to modify it." >&2
+            exit 1
+          fi
+          {
+            echo "## Checksums (SHA-256)"
+            echo ""
+            echo '```'
+            echo "android-artifacts.zip  ${{ steps.checksums.outputs.android }}"
+            echo "ios-artifacts.zip      ${{ steps.checksums.outputs.ios }}"
+            echo '```'
+          } > notes.md
+          gh release create "$TAG" \
+            android-artifacts.zip ios-artifacts.zip checksums.json \
+            --title "$TAG" \
+            --notes-file notes.md \
+            --verify-tag
+
+  publish-npm:
+    runs-on: ubuntu-latest
+    needs: [check-version, release]
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Download artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: '*-artifacts'
+          merge-multiple: true
+
+      - name: Extract generated bindings and binaries
+        run: |
+          unzip -o -q android-artifacts.zip
+          unzip -o -q ios-artifacts.zip
+
+      - name: Build package
+        run: pnpm prepare
+
+      - name: Inject artifact checksums
+        run: |
+          jq --arg android "${{ needs.release.outputs.android_checksum }}" \
+             --arg ios "${{ needs.release.outputs.ios_checksum }}" \
+             '.checksums = {android: $android, ios: $ios} | del(.scripts.prepare)' \
+             package.json > package.json.tmp
+          mv package.json.tmp package.json
+
+      - name: Remove binaries from the npm tarball
+        run: rm -rf android/src/main/jniLibs BdkRnFramework.xcframework ./*.zip
+
+      - name: Publish to npm
+        run: npm publish --access public --ignore-scripts
