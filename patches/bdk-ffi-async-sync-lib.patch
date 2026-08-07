@@ -1,8 +1,8 @@
 diff --git a/bdk-ffi/src/lib.rs b/bdk-ffi/src/lib.rs
-index 1693ff3..ac5cbb5 100644
+index 8ee2026..b8dd51a 100644
 --- a/bdk-ffi/src/lib.rs
 +++ b/bdk-ffi/src/lib.rs
-@@ -16,5 +16,26 @@ mod tests;
+@@ -17,5 +17,26 @@ mod tests;
  
  use crate::bitcoin::FeeRate;
  use crate::bitcoin::OutPoint;
