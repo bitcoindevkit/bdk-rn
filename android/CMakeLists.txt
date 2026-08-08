@@ -6,14 +6,52 @@ set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 17)
 
 # Resolve the path to the uniffi-bindgen-react-native package
+#
+# TEMPORARY: revert this block (and the `noOverwrite` entry in ubrn.config.yaml)
+# once a uniffi-bindgen-react-native release after 0.31.0-3 is out and we bump to
+# it. Track https://github.com/jhugman/uniffi-bindgen-react-native/issues/421
+#
+# 0.31.0-3 publishes an "exports" map that does not expose ./package.json, so the
+# upstream resolution below throws ERR_PACKAGE_PATH_NOT_EXPORTED. That surfaces to
+# our users as a "'UniffiCallInvoker.h' file not found" compile error, because the
+# empty path silently becomes `-I/cpp/includes`. Upstream fixed it by adding
+# `"./package.json": "./package.json"` to their exports (PR #407, merged 2b57645),
+# but it is unreleased — and since we ship this file in our tarball and pin
+# 0.31.0-3, patching it here is the only thing that reaches downstream consumers.
+#
+# The `try` branch is verbatim what upstream generates and starts working again on
+# their next release; the fallback finds the package root by walking up from the
+# entry point, which no "exports" map can gate.
 execute_process(
-    COMMAND node -p "require.resolve('uniffi-bindgen-react-native/package.json')"
+    COMMAND node -e [==[
+const path = require('path');
+const fs = require('fs');
+let root;
+try {
+  root = path.dirname(
+    require.resolve('uniffi-bindgen-react-native/package.json'));
+} catch (e) {
+  if (e.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') throw e;
+  root = path.dirname(require.resolve('uniffi-bindgen-react-native'));
+  while (root !== path.dirname(root) &&
+         !fs.existsSync(path.join(root, 'cpp', 'includes'))) {
+    root = path.dirname(root);
+  }
+}
+console.log(root);
+]==]
     OUTPUT_VARIABLE UNIFFI_BINDGEN_PATH
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE UNIFFI_BINDGEN_ERROR
+    RESULT_VARIABLE UNIFFI_BINDGEN_RESULT
 )
-# Get the directory; get_filename_component and cmake_path will normalize
-# paths with Windows path separators.
-get_filename_component(UNIFFI_BINDGEN_PATH "${UNIFFI_BINDGEN_PATH}" DIRECTORY)
+# Fail loudly here. Upstream omits this check, which is why an unresolved package
+# turns into a confusing missing-header error much later in the build.
+if(NOT UNIFFI_BINDGEN_RESULT EQUAL 0 OR NOT IS_DIRECTORY "${UNIFFI_BINDGEN_PATH}/cpp/includes")
+    message(FATAL_ERROR
+        "Could not locate the uniffi-bindgen-react-native C++ headers. "
+        "node exited with '${UNIFFI_BINDGEN_RESULT}': ${UNIFFI_BINDGEN_ERROR}")
+endif()
 
 # Specifies a path to native header files.
 include_directories(

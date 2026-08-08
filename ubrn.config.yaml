@@ -2,6 +2,13 @@ rust:
   directory: bdk-ffi/bdk-ffi
   manifestPath: Cargo.toml
 
+# TEMPORARY: android/CMakeLists.txt carries a hand-written workaround for
+# https://github.com/jhugman/uniffi-bindgen-react-native/issues/421 that `ubrn
+# build android --and-generate` would otherwise overwrite on every build. Drop
+# this once we bump past 0.31.0-3 and revert the patch.
+noOverwrite:
+  - android/CMakeLists.txt
+
 android:
   targets:
     - arm64-v8a
