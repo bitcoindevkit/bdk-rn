@@ -12,8 +12,8 @@ importers:
         specifier: 0.82.1
         version: 0.82.1(@types/react@19.2.14)(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1)
       bdk-rn:
-        specifier: file:../bdk-rn-1.0.0.tgz
-        version: file:../bdk-rn-1.0.0.tgz(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1)
+        specifier: file:../bdk-rn-1.1.0-alpha.0.tgz
+        version: file:../bdk-rn-1.1.0-alpha.0.tgz(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1)
       react:
         specifier: 19.1.1
         version: 19.1.1
@@ -1162,6 +1162,9 @@ packages:
     resolution: {integrity: sha512-f1UQF7ggd42YiwI5wGrRaPsa+P0CINBlrkLPmGfpq/u/I/oVtecoEIfFR9ag/oa1sLOsRNZ6xehf6qMZhQGBDg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@ubjs/core@0.31.0-3':
+    resolution: {integrity: sha512-39XrJgUZ2VVb561sSnkXPhczNoeBsNiSRArecsV0JE7CJq69ajFkcn9/tBAUS2NpgHkLIDU+z6Ks2+1wXnboxg==}
+
   '@ungap/structured-clone@1.3.1':
     resolution: {integrity: sha512-mUFwbeTqrVgDQxFveS+df2yfap6iuP20NAKAsBt5jDEoOTDew+zwLAOilHCeQJOVSvmgCX4ogqIrA0mnyr08yQ==}
 
@@ -1355,9 +1358,9 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  bdk-rn@file:../bdk-rn-1.0.0.tgz:
-    resolution: {integrity: sha512-zhbg2u7ceMR85ccmnInHNnh8FQxvyq82axP2o8iaDqyT68AI5dXiMVD5s6hY1gysZeajHObR06ue70UQDsELbg==, tarball: file:../bdk-rn-1.0.0.tgz}
-    version: 1.0.0
+  bdk-rn@file:../bdk-rn-1.1.0-alpha.0.tgz:
+    resolution: {integrity: sha512-3pacjZuYkja2fo8cmyOj2+8R9FXQOAewQXrKq01bO2c4kYkw0YyV3wCW3KMqz2q6gI2ZM3zgoTaFe7UqfFukTQ==, tarball: file:../bdk-rn-1.1.0-alpha.0.tgz}
+    version: 1.1.0-alpha.0
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -3360,9 +3363,8 @@ packages:
     resolution: {integrity: sha512-hpbDzxUY9BFwX+UeBnxv3Sh1q7HFxj48DTmXchNgRa46lO8uj3/1iEn3MiNUYTg1g9ctIqXCCERn8gYZhHC5lQ==}
     engines: {node: '>=4'}
 
-  uniffi-bindgen-react-native@https://codeload.github.com/jhugman/uniffi-bindgen-react-native/tar.gz/21702c20a277a622776505744b67d83fc0f48c8a:
-    resolution: {tarball: https://codeload.github.com/jhugman/uniffi-bindgen-react-native/tar.gz/21702c20a277a622776505744b67d83fc0f48c8a}
-    version: 0.30.0-1
+  uniffi-bindgen-react-native@0.31.0-3:
+    resolution: {integrity: sha512-br7giBJRr/j00rdMXhOZGMGuDWMAVUcxC9O3lco0KRqzEAxUz00+gegPW5tKamvKbrnj7NB682XUCYrcagtxFA==}
     hasBin: true
 
   universalify@0.1.2:
@@ -5081,6 +5083,8 @@ snapshots:
       '@typescript-eslint/types': 8.59.3
       eslint-visitor-keys: 5.0.1
 
+  '@ubjs/core@0.31.0-3': {}
+
   '@ungap/structured-clone@1.3.1': {}
 
   '@vscode/sudo-prompt@9.3.2': {}
@@ -5329,11 +5333,12 @@ snapshots:
 
   baseline-browser-mapping@2.10.29: {}
 
-  bdk-rn@file:../bdk-rn-1.0.0.tgz(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1):
+  bdk-rn@file:../bdk-rn-1.1.0-alpha.0.tgz(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1):
     dependencies:
+      '@ubjs/core': 0.31.0-3
       react: 19.1.1
       react-native: 0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1)
-      uniffi-bindgen-react-native: https://codeload.github.com/jhugman/uniffi-bindgen-react-native/tar.gz/21702c20a277a622776505744b67d83fc0f48c8a
+      uniffi-bindgen-react-native: 0.31.0-3
 
   bl@4.1.0:
     dependencies:
@@ -7807,7 +7812,7 @@ snapshots:
 
   unicode-property-aliases-ecmascript@2.2.0: {}
 
-  uniffi-bindgen-react-native@https://codeload.github.com/jhugman/uniffi-bindgen-react-native/tar.gz/21702c20a277a622776505744b67d83fc0f48c8a: {}
+  uniffi-bindgen-react-native@0.31.0-3: {}
 
   universalify@0.1.2: {}
 

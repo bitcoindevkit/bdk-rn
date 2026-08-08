@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@react-native/new-app-screen": "0.82.1",
-    "bdk-rn": "file:../bdk-rn-1.0.0.tgz",
+    "bdk-rn": "file:../bdk-rn-1.1.0-alpha.0.tgz",
     "react": "19.1.1",
     "react-native": "0.82.1",
     "react-native-fs": "^2.20.0",

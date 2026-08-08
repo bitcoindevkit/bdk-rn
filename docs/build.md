@@ -40,7 +40,7 @@ just build-tarball-android
 cd tests
 
 # Install JS dependencies
-npm install
+pnpm install
 
 # Terminal 1: Monitor the logs
 adb logcat -c && adb logcat -s ReactNativeJS | tee tests.log
@@ -49,7 +49,7 @@ adb logcat -c && adb logcat -s ReactNativeJS | tee tests.log
 npx react-native start --reset-cache
 
 # Terminal 3: Build the app and run the tests
-just test-android
+just test
 ```
 
 ## Test Development Workflow
