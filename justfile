@@ -58,10 +58,10 @@ submodule-apply-patch:
   && git apply -C1 ../patches/bdk-ffi-async-sync-electrum.patch
 
 [group("Build")]
-[doc("Build the tarball for Android only.")]
-build-tarball-android:
+[doc("Build the tarball for Android only. Pass ABIs to override ubrn.config.yaml, e.g. `just build-tarball-android x86_64` for a CI emulator.")]
+build-tarball-android targets="":
   pnpm install --ignore-scripts
-  pnpm ubrn:android --config ubrn.config.yaml
+  pnpm ubrn:android --config ubrn.config.yaml {{ if targets == "" { "" } else { "--targets " + targets } }}
   pnpm pack
 
 [group("Build")]

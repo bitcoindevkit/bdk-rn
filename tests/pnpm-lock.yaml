@@ -1359,7 +1359,7 @@ packages:
     hasBin: true
 
   bdk-rn@file:../bdk-rn-1.1.0-alpha.0.tgz:
-    resolution: {integrity: sha512-3pacjZuYkja2fo8cmyOj2+8R9FXQOAewQXrKq01bO2c4kYkw0YyV3wCW3KMqz2q6gI2ZM3zgoTaFe7UqfFukTQ==, tarball: file:../bdk-rn-1.1.0-alpha.0.tgz}
+    resolution: {integrity: sha512-RmKbfu8Q/VzYxiztclFpdv0u4tq4Ry12mGwWlf/qkIbqx+jNvhPtkqZkB4QWqZdvz+kNLrsqVBaORdR6dinguw==, tarball: file:../bdk-rn-1.1.0-alpha.0.tgz}
     version: 1.1.0-alpha.0
     peerDependencies:
       react: '*'

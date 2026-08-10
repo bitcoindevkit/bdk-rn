@@ -1,0 +1,158 @@
+name: Test Android
+
+# Builds the bdk-rn tarball for the emulator's ABI, installs it into the standalone
+# tests/ app the way a downstream consumer would, and runs the integration suite on
+# an Android emulator.
+#
+# The suite reports through logcat rather than an instrumentation runner, so
+# tests/scripts/run-android-tests.sh is what turns its output into an exit code.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions: {}
+
+env:
+  # tests/android/build.gradle pins this exact NDK; gradle and cargo-ndk must agree.
+  NDK_VERSION: "27.1.12297006"
+
+jobs:
+  test-android:
+    name: "Test Android library"
+    runs-on: ubuntu-24.04
+
+    services:
+      # Backs the esplora background-sync test, which talks to http://10.0.2.2:3002
+      # (the emulator's route back to the runner host).
+      bitcoin-regtest:
+        image: ghcr.io/thunderbiscuit/podman-regtest-infinity-pro:0.4.0
+        ports:
+          - 18443:18443
+          - 18444:18444
+          - 3002:3002
+          - 60401:60401
+        # Holds other steps until regtest has mined enough blocks to be usable.
+        options: >-
+          --health-cmd "test $(bitcoin-cli -regtest -rpcuser=regtest -rpcpassword=password getblockcount) -gt 100"
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          # bdk-ffi is a submodule and the Rust build needs it.
+          submodules: true
+          persist-credentials: false
+
+      # Up front rather than just before the emulator: the Rust target directory,
+      # node_modules and the emulator system image are each multi-GB. The regtest
+      # image is referenced by a running container, so the docker prune skips it.
+      - name: "Free disk space"
+        uses: AdityaGarg8/remove-unwanted-software@v5
+        with:
+          remove-dotnet: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
+          remove-large-packages: false
+
+      - name: "Set up JDK"
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: "Set up Android SDK"
+        uses: android-actions/setup-android@v4
+
+      - name: "Set up Android NDK"
+        run: |
+          sdkmanager --install "ndk;${NDK_VERSION}"
+          echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> "${GITHUB_ENV}"
+          echo "ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> "${GITHUB_ENV}"
+
+      - name: "Set up Rust"
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: x86_64-linux-android
+          cache: false
+
+      - name: "Install cargo-ndk"
+        run: cargo install cargo-ndk --locked
+
+      - name: "Set up just"
+        uses: extractions/setup-just@v3
+
+      - name: "Set up pnpm"
+        uses: pnpm/action-setup@v5
+
+      - name: "Set up Node"
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # Required for the async Electrum and Esplora methods the tests exercise.
+      - name: "Apply the bdk-ffi async-sync patches"
+        run: just submodule-apply-patch
+
+      # x86_64 only. The emulator below runs that ABI, and also building the
+      # arm64-v8a we ship would double the Rust build for nothing.
+      - name: "Build the library and pack the tarball"
+        run: just build-tarball-android x86_64
+
+      # tests/package.json pins the tarball by filename, so a version bump that
+      # misses it would otherwise fail deep inside pnpm.
+      - name: "Check tests/ references the tarball we just built"
+        run: |
+          expected="bdk-rn-$(node --print "require('./package.json').version").tgz"
+          referenced="$(node --print "require('./tests/package.json').dependencies['bdk-rn']")"
+          if [ "${referenced}" != "file:../${expected}" ]; then
+            echo "::error::tests/package.json depends on '${referenced}' but the library packs '${expected}'."
+            exit 1
+          fi
+          test -f "${expected}"
+
+      # --no-frozen-lockfile is required, not laziness: the lockfile records an
+      # integrity hash for the local tarball, and that hash changes on every build.
+      - name: "Install the test app dependencies"
+        working-directory: tests
+        run: |
+          rm -rf node_modules/bdk-rn
+          pnpm install --ignore-workspace --no-frozen-lockfile
+
+      # Assembled before the emulator boots so that a gradle failure is reported on
+      # its own, and so the emulator step stays short.
+      - name: "Build the test app"
+        working-directory: tests/android
+        run: ./gradlew :app:assembleRelease --console=plain
+
+      - name: "Enable KVM"
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: "Run the integration tests"
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot"
+          script: ./tests/scripts/run-android-tests.sh
+
+      - name: "Upload the test log"
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: android-test-log
+          path: tests/tests.log
+          if-no-files-found: ignore
