@@ -19,6 +19,18 @@ permissions: {}
 env:
   # tests/android/build.gradle pins this exact NDK; gradle and cargo-ndk must agree.
   NDK_VERSION: "27.1.12297006"
+  # Split the way android-emulator-runner wants it. Kept here so the pre-install
+  # step and the emulator step below cannot drift apart.
+  #
+  # 36 matches the targetSdkVersion in tests/android/build.gradle, so the suite runs
+  # on the platform it is built for. google_atd is the Automated Test Device variant
+  # of google_apis: same Play services, stripped of the apps a headless CI run never
+  # uses, which takes the download from 1.90 GB to 0.86 GB. That download is the step
+  # that keeps failing, so halving it is the point. ATD is headless-only, which the
+  # -no-window / swiftshader_indirect options below already are.
+  EMULATOR_API_LEVEL: "36"
+  EMULATOR_TARGET: "google_atd"
+  EMULATOR_ARCH: "x86_64"
 
 jobs:
   test-android:
@@ -68,14 +80,76 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: "Set up Android SDK"
-        uses: android-actions/setup-android@v4
+      # The runner image already provides the SDK and sets ANDROID_HOME, so the only
+      # thing missing is usable tools in cmdline-tools/latest: it ships 12.0 there,
+      # which predates the v4 SDK schema and cannot represent a multi-ABI system image
+      # (every image at API 34 and above is one). android-emulator-runner runs
+      # avdmanager from latest/ specifically, so that directory alone decides whether
+      # the AVD can be created. Upgrading it in place is what keeps this job and the
+      # emulator step on one set of tools, which is the whole ballgame here: a package
+      # installed by a different copy of the tools writes a package.xml the
+      # AVD-creating tools may not be able to read back.
+      - name: "Set up the Android cmdline-tools"
+        run: |
+          sdkmanager="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+          yes | "${sdkmanager}" --licenses > /dev/null
+          "${sdkmanager}" --install "cmdline-tools;latest"
+          # sdkmanager refuses to overwrite the directory it is running from, so the
+          # new copy lands in latest-2 and we swap it into place ourselves.
+          if [ -d "${ANDROID_HOME}/cmdline-tools/latest-2" ]; then
+            rm -rf "${ANDROID_HOME}/cmdline-tools/latest"
+            mv "${ANDROID_HOME}/cmdline-tools/latest-2" "${ANDROID_HOME}/cmdline-tools/latest"
+          fi
+          echo "${ANDROID_HOME}/cmdline-tools/latest/bin" >> "${GITHUB_PATH}"
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --version
 
       - name: "Set up Android NDK"
         run: |
-          sdkmanager --install "ndk;${NDK_VERSION}"
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --install "ndk;${NDK_VERSION}"
           echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> "${GITHUB_ENV}"
           echo "ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> "${GITHUB_ENV}"
+
+      # The emulator prerequisites run here, ahead of the ~13 minutes of Rust and
+      # gradle work below, because they fail for reasons that have nothing to do with
+      # the library. Waiting for a build that always succeeds before finding out the
+      # SDK is unusable just makes the loop slower.
+      - name: "Enable KVM"
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Two separate failures live here, so the loop checks two things.
+      #
+      # The download is ~1 GB from dl.google.com and drops often enough on hosted
+      # runners to fail a job outright ("Failed to download package!"), and sdkmanager
+      # neither retries nor says why.
+      #
+      # Separately, a reported-successful install is sometimes invisible to the very
+      # next avdmanager, which then fails inside the emulator action with "contains no
+      # system images" and takes the job down with it. Creating a throwaway AVD here
+      # is the only check that actually exercises what the emulator action needs, and
+      # a failed probe is recoverable by reinstalling, which it is not once we have
+      # handed control to the action.
+      - name: "Install the emulator system image"
+        run: |
+          tools="${ANDROID_HOME}/cmdline-tools/latest/bin"
+          image="system-images;android-${EMULATOR_API_LEVEL};${EMULATOR_TARGET};${EMULATOR_ARCH}"
+          for attempt in 1 2 3; do
+            if "${tools}/sdkmanager" --install "${image}" --channel=0; then
+              if echo no | "${tools}/avdmanager" create avd --force --name probe \
+                   --package "${image}" --device "Nexus 6"; then
+                "${tools}/avdmanager" delete avd --name probe || true
+                exit 0
+              fi
+              echo "::warning::'${image}' installed but avdmanager cannot see it."
+            fi
+            echo "::warning::Attempt ${attempt} of 3 to provide '${image}' failed; retrying."
+            "${tools}/sdkmanager" --uninstall "${image}" --channel=0 || true
+            sleep $(( attempt * 20 ))
+          done
+          echo "::error::Could not provide a usable '${image}' after 3 attempts."
+          exit 1
 
       - name: "Set up Rust"
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -133,25 +207,19 @@ jobs:
         working-directory: tests/android
         run: ./gradlew :app:assembleRelease --console=plain
 
-      - name: "Enable KVM"
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
       - name: "Run the integration tests"
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
+          api-level: ${{ env.EMULATOR_API_LEVEL }}
+          target: ${{ env.EMULATOR_TARGET }}
+          arch: ${{ env.EMULATOR_ARCH }}
           profile: Nexus 6
           emulator-options: "-no-window -gpu swiftshader_indirect -no-snapshot"
           script: ./tests/scripts/run-android-tests.sh
 
       - name: "Upload the test log"
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: android-test-log
           path: tests/tests.log
