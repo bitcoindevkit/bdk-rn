@@ -26,3 +26,7 @@ To build the library and start testing locally, you must have:
 ## Additional Resources
 
 For more advanced information on how to build this library, see the [uniffi-bindgen-react-native documentation](https://jhugman.github.io/uniffi-bindgen-react-native/guides/rn/getting-started.html).
+
+## API Reference
+
+Browse the auto-generated [API reference](https://bitcoindevkit.github.io/bdk-rn/api/) for all public classes, methods, and types. Example apps (linked below) provide supplementary usage walkthroughs.

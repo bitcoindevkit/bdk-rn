@@ -59,3 +59,31 @@ just test
 3. Update tests: `cd tests && npm install`
 4. Add or modify tests in the tests
 5. Run the app and verify test results in logcat or in the emulator
+
+## Generating API Reference Docs
+
+The API reference is generated with [TypeDoc](https://typedoc.org/) from the
+TypeScript bindings produced by ubrn. You must generate the bindings first:
+
+```shell
+just submodule-init
+just submodule-apply-patch
+pnpm ubrn:android --config ubrn.config.yaml
+```
+
+Then build the API docs alone or the full site:
+
+```shell
+# API reference only → site/api/
+just api-docs
+
+# Full site (guides + API) → site/
+just docs-build
+```
+
+Preview the API reference by opening `site/api/index.html` in a browser.
+`just docs` serves the Zensical guides only; use a static server on `site/`
+to preview the combined site locally.
+
+Docs are deployed to GitHub Pages on push to `main` (once CI is in place),
+or manually via `./deploy-docs.sh`.
