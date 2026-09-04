@@ -1,5 +1,5 @@
 diff --git a/bdk-ffi/src/electrum.rs b/bdk-ffi/src/electrum.rs
-index 57288c1..6106bd4 100644
+index 57288c1..a9d545d 100644
 --- a/bdk-ffi/src/electrum.rs
 +++ b/bdk-ffi/src/electrum.rs
 @@ -24,7 +24,7 @@ use std::time::Duration;
@@ -29,7 +29,7 @@ index 57288c1..6106bd4 100644
          &self,
          request: Arc<FullScanRequest>,
          stop_gap: u64,
-@@ -90,20 +90,22 @@ impl ElectrumClient {
+@@ -90,20 +90,28 @@ impl ElectrumClient {
              .take()
              .ok_or(ElectrumError::RequestAlreadyConsumed)?;
  
@@ -42,8 +42,12 @@ index 57288c1..6106bd4 100644
 +        let client = Arc::clone(&self.0);
 +        crate::run_async(async move {
 +            tokio::task::spawn_blocking(move || -> Result<Arc<Update>, ElectrumError> {
-+                let result: BdkFullScanResponse<KeychainKind> =
-+                    client.full_scan(request, stop_gap as usize, batch_size as usize, fetch_prev_txouts)?;
++                let result: BdkFullScanResponse<KeychainKind> = client.full_scan(
++                    request,
++                    stop_gap as usize,
++                    batch_size as usize,
++                    fetch_prev_txouts,
++                )?;
  
 -        let update = BdkUpdate {
 -            last_active_indices: full_scan_result.last_active_indices,
@@ -59,13 +63,15 @@ index 57288c1..6106bd4 100644
 +                })))
 +            })
 +            .await
-+            .map_err(|e| ElectrumError::Message { error_message: e.to_string() })?
++            .map_err(|e| ElectrumError::Message {
++                error_message: e.to_string(),
++            })?
 +        })
 +        .await
      }
  
      /// Sync a set of scripts with the blockchain (via an Electrum client) for the data specified and returns updates for bdk_chain data structures.
-@@ -121,7 +123,7 @@ impl ElectrumClient {
+@@ -121,7 +129,7 @@ impl ElectrumClient {
      ///
      /// If the scripts to sync are unknown, such as when restoring or importing a keychain that may
      /// include scripts that have been used, use full_scan with the keychain.
@@ -74,7 +80,7 @@ index 57288c1..6106bd4 100644
          &self,
          request: Arc<SyncRequest>,
          batch_size: u64,
-@@ -135,17 +137,22 @@ impl ElectrumClient {
+@@ -135,17 +143,24 @@ impl ElectrumClient {
              .take()
              .ok_or(ElectrumError::RequestAlreadyConsumed)?;
  
@@ -101,7 +107,9 @@ index 57288c1..6106bd4 100644
 +                })))
 +            })
 +            .await
-+            .map_err(|e| ElectrumError::Message { error_message: e.to_string() })?
++            .map_err(|e| ElectrumError::Message {
++                error_message: e.to_string(),
++            })?
 +        })
 +        .await
      }

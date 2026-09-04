@@ -45,7 +45,8 @@ submodule-regen-patch:
   && git diff --unified=3 HEAD -- bdk-ffi/Cargo.toml > ../patches/bdk-ffi-async-sync-cargo.patch \
   && git diff --unified=3 HEAD -- bdk-ffi/src/lib.rs > ../patches/bdk-ffi-async-sync-lib.patch \
   && git diff --unified=3 HEAD -- bdk-ffi/src/esplora.rs > ../patches/bdk-ffi-async-sync-esplora.patch \
-  && git diff --unified=3 HEAD -- bdk-ffi/src/electrum.rs > ../patches/bdk-ffi-async-sync-electrum.patch
+  && git diff --unified=3 HEAD -- bdk-ffi/src/electrum.rs > ../patches/bdk-ffi-async-sync-electrum.patch \
+  && git diff --unified=3 HEAD -- bdk-ffi/src/tests/tx_builder.rs > ../patches/bdk-ffi-async-sync-tests.patch
 
 [group("Submodule")]
 [doc("Apply the async-sync patches to the bdk-ffi submodule.")]
@@ -55,7 +56,8 @@ submodule-apply-patch:
   && git apply -C1 ../patches/bdk-ffi-async-sync-cargo.patch \
   && git apply -C1 ../patches/bdk-ffi-async-sync-lib.patch \
   && git apply -C1 ../patches/bdk-ffi-async-sync-esplora.patch \
-  && git apply -C1 ../patches/bdk-ffi-async-sync-electrum.patch
+  && git apply -C1 ../patches/bdk-ffi-async-sync-electrum.patch \
+  && git apply -C1 ../patches/bdk-ffi-async-sync-tests.patch
 
 [group("Build")]
 [doc("Build the tarball for Android only. Pass ABIs to override ubrn.config.yaml, e.g. `just build-tarball-android x86_64` for a CI emulator.")]

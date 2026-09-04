@@ -1,0 +1,15 @@
+diff --git a/bdk-ffi/src/tests/tx_builder.rs b/bdk-ffi/src/tests/tx_builder.rs
+index 902fbb5..a743e2e 100644
+--- a/bdk-ffi/src/tests/tx_builder.rs
++++ b/bdk-ffi/src/tests/tx_builder.rs
+@@ -90,7 +90,9 @@ fn create_and_sync_wallet() -> Wallet {
+         .unwrap()
+         .build()
+         .unwrap();
+-    let update = client.full_scan(full_scan_request, 10, 10).unwrap();
++    let update = crate::RUNTIME
++        .block_on(client.full_scan(full_scan_request, 10, 10))
++        .unwrap();
+     wallet.apply_update(update).unwrap();
+     println!("Wallet balance: {:?}", wallet.balance().total.to_sat());
+     wallet

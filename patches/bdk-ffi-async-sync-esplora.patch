@@ -1,5 +1,5 @@
 diff --git a/bdk-ffi/src/esplora.rs b/bdk-ffi/src/esplora.rs
-index aa09051..7f4e1bf 100644
+index 6311df5..1c038d5 100644
 --- a/bdk-ffi/src/esplora.rs
 +++ b/bdk-ffi/src/esplora.rs
 @@ -48,7 +48,7 @@ impl EsploraClient {
@@ -11,30 +11,13 @@ index aa09051..7f4e1bf 100644
          &self,
          request: Arc<FullScanRequest>,
          stop_gap: u64,
-@@ -62,29 +62,23 @@ impl EsploraClient {
+@@ -62,17 +62,24 @@ impl EsploraClient {
              .take()
              .ok_or(EsploraError::RequestAlreadyConsumed)?;
  
 -        let result: BdkFullScanResponse<KeychainKind> =
--            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
--                self.0
-+        let client = self.0.clone();
-+        crate::run_async(async move {
-+            tokio::task::spawn_blocking(move || -> Result<Arc<Update>, EsploraError> {
-+                let result: BdkFullScanResponse<KeychainKind> = client
-                     .full_scan(request, stop_gap as usize, parallel_requests as usize)
--            }))
--            .map_err(|payload| {
--                let error_message = payload
--                    .downcast_ref::<String>()
--                    .map(String::as_str)
--                    .or_else(|| payload.downcast_ref::<&str>().copied())
--                    .unwrap_or("panic in esplora client")
--                    .to_string();
-+                    .map_err(EsploraError::from)?;
- 
--                EsploraError::Parsing { error_message }
--            })??;
+-            self.0
+-                .full_scan(request, stop_gap as usize, parallel_requests as usize)?;
 -
 -        let update = BdkUpdate {
 -            last_active_indices: result.last_active_indices,
@@ -43,6 +26,12 @@ index aa09051..7f4e1bf 100644
 -        };
 -
 -        Ok(Arc::new(Update(update)))
++        let client = self.0.clone();
++        crate::run_async(async move {
++            tokio::task::spawn_blocking(move || -> Result<Arc<Update>, EsploraError> {
++                let result: BdkFullScanResponse<KeychainKind> =
++                    client.full_scan(request, stop_gap as usize, parallel_requests as usize)?;
++
 +                Ok(Arc::new(Update(BdkUpdate {
 +                    last_active_indices: result.last_active_indices,
 +                    tx_update: result.tx_update,
@@ -50,13 +39,15 @@ index aa09051..7f4e1bf 100644
 +                })))
 +            })
 +            .await
-+            .map_err(|e| EsploraError::Parsing { error_message: e.to_string() })?
++            .map_err(|e| EsploraError::Parsing {
++                error_message: e.to_string(),
++            })?
 +        })
 +        .await
      }
  
      /// Sync a set of scripts, txids, and/or outpoints against Esplora.
-@@ -92,7 +86,7 @@ impl EsploraClient {
+@@ -80,7 +87,7 @@ impl EsploraClient {
      /// `request` provides the data required to perform a script-pubkey-based sync (see
      /// [`SyncRequest`]). `parallel_requests` specifies the maximum number of HTTP requests to make
      /// in parallel.
@@ -65,24 +56,11 @@ index aa09051..7f4e1bf 100644
          &self,
          request: Arc<SyncRequest>,
          parallel_requests: u64,
-@@ -105,28 +99,23 @@ impl EsploraClient {
+@@ -93,15 +100,23 @@ impl EsploraClient {
              .take()
              .ok_or(EsploraError::RequestAlreadyConsumed)?;
  
--        let result: BdkSyncResponse =
--            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
--                self.0.sync(request, parallel_requests as usize)
--            }))
--            .map_err(|payload| {
--                let error_message = payload
--                    .downcast_ref::<String>()
--                    .map(String::as_str)
--                    .or_else(|| payload.downcast_ref::<&str>().copied())
--                    .unwrap_or("panic in esplora client")
--                    .to_string();
--
--                EsploraError::Parsing { error_message }
--            })??;
+-        let result: BdkSyncResponse = self.0.sync(request, parallel_requests as usize)?;
 -
 -        let update = BdkUpdate {
 -            last_active_indices: BTreeMap::default(),
@@ -94,9 +72,7 @@ index aa09051..7f4e1bf 100644
 +        let client = self.0.clone();
 +        crate::run_async(async move {
 +            tokio::task::spawn_blocking(move || -> Result<Arc<Update>, EsploraError> {
-+                let result: BdkSyncResponse = client
-+                    .sync(request, parallel_requests as usize)
-+                    .map_err(EsploraError::from)?;
++                let result: BdkSyncResponse = client.sync(request, parallel_requests as usize)?;
 +
 +                Ok(Arc::new(Update(BdkUpdate {
 +                    last_active_indices: BTreeMap::default(),
@@ -105,7 +81,9 @@ index aa09051..7f4e1bf 100644
 +                })))
 +            })
 +            .await
-+            .map_err(|e| EsploraError::Parsing { error_message: e.to_string() })?
++            .map_err(|e| EsploraError::Parsing {
++                error_message: e.to_string(),
++            })?
 +        })
 +        .await
      }
