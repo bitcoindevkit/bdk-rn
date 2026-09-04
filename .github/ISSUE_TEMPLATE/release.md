@@ -17,7 +17,7 @@ cd bdk-ffi/
 git fetch --all
 git checkout <tag>
 cd ..
-just apply-submodule-patches
+just submodule-apply-patch
 just clean
 just build-tarball
 cd tests/
