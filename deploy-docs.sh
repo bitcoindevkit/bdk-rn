@@ -4,7 +4,7 @@
 set -euo pipefail
 
 rm -rf ./site/*
-uv run zensical build
+just docs-build
 cd ./site/
 git init .
 git switch --create gh-pages

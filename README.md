@@ -11,9 +11,9 @@ The code in this repository is mostly comprised of:
 
 The core Rust code that is exposed to the React Native language bindings actually resides in the [bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) repository. This repo pulls it in as a submodule.
 
-## Exploring the Example Apps
+## Exploring the API and Example Apps
 
-To take a look at the API exposed in this library, you can run our example applications. [Read the docs on this here](https://bitcoindevkit.github.io/bdk-rn/example-apps/), and [find our example apps here](https://github.com/thunderbiscuit/bdk-rn-example-apps).
+Browse the [API reference](https://bitcoindevkit.github.io/bdk-rn/api/) for all public classes, methods, and types. For hands-on usage walkthroughs, run our [example applications](https://github.com/thunderbiscuit/bdk-rn-example-apps). [Read the docs on example apps here](https://bitcoindevkit.github.io/bdk-rn/example-apps/).
 
 <br>
 
