@@ -175,7 +175,7 @@
     "version": "0.52.0"
   },
   "dependencies": {
-    "@ubjs/core": "0.31.0-3",
-    "uniffi-bindgen-react-native": "0.31.0-3"
+    "@ubjs/core": "0.31.0-5",
+    "uniffi-bindgen-react-native": "0.31.0-5"
   }
 }
