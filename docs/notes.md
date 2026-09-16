@@ -2,11 +2,7 @@
 
 ## Known Issues
 
-### 1. cargo-ndk --no-strip Issue
-
-The `cargo-ndk` library removed the `--no-strip` argument and this is creating a build error when using the latest release of `uniffi-bindgen-react-native` (`0.29.3-1`). We are currently building using a commit on their `main` branch which contains the patch. See the `package.json` file for details.
-
-### 2. Emulator Compatibility
+### 1. Emulator Compatibility
 
 For some reason the [Android example app](https://github.com/thunderbiscuit/bdk-rn-example-apps) doesn't work on the Pixel 8 API 35 emulator, but does work on the Pixel 5 API 31 and the Pixel 9 API 36.
 
