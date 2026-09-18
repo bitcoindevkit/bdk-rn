@@ -11,6 +11,19 @@ The code in this repository is mostly comprised of:
 
 The core Rust code that is exposed to the React Native language bindings actually resides in the [bdk-ffi](https://github.com/bitcoindevkit/bdk-ffi) repository. This repo pulls it in as a submodule.
 
+## Supported Platforms
+
+The package ships prebuilt native libraries for:
+
+- **Android:** `arm64-v8a` (devices) and `x86_64` (emulators)
+- **iOS:** `arm64` devices and `arm64` simulators (Apple Silicon Macs)
+
+32-bit Android ABIs (`armeabi-v7a` and `x86`) are not supported. New React Native apps build all four Android ABIs by default, which produces 32-bit builds that do not contain bdk-rn and would crash on a 32-bit-only device. Restrict your app to the supported ABIs in `android/gradle.properties`:
+
+```properties
+reactNativeArchitectures=arm64-v8a,x86_64
+```
+
 ## Exploring the Example Apps
 
 To take a look at the API exposed in this library, you can run our example applications. [Read the docs on this here](https://bitcoindevkit.github.io/bdk-rn/example-apps/), and [find our example apps here](https://github.com/thunderbiscuit/bdk-rn-example-apps).
