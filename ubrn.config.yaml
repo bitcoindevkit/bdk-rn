@@ -3,8 +3,12 @@ rust:
   manifestPath: Cargo.toml
 
 android:
+  # 64-bit only: arm64-v8a for devices, x86_64 for emulators. ubrn writes this
+  # list into ndk.abiFilters in android/build.gradle, so bdk-rn is only built
+  # and packaged for these two whatever the app's reactNativeArchitectures says.
   targets:
     - arm64-v8a
+    - x86_64
   # Link the Rust library as a .so rather than a static archive. The binaries
   # ship in the npm package, and a static archive carries every object file in
   # the dependency graph: ~150 MB per ABI, against ~15 MB for the linked .so.

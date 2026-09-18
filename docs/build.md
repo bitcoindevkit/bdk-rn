@@ -15,7 +15,7 @@ git clone git@github.com:bitcoindevkit/bdk-rn.git
 cd bdk-rn
 
 # Install compilation targets
-rustup target add aarch64-linux-android aarch64-apple-ios aarch64-apple-ios-sim
+rustup target add aarch64-linux-android x86_64-linux-android aarch64-apple-ios aarch64-apple-ios-sim
 
 # Apply the patch to the submodule (required for async Electrum and Esplora methods)
 just submodule-apply-patch
