@@ -1,0 +1,369 @@
+name: Release
+
+# Builds the native libraries, packs them into the npm tarball, and publishes it.
+# The package ships its prebuilt binaries: consumers need neither a Rust
+# toolchain nor an install script.
+#
+#   build-android ─┐
+#                  ├─ publish (npm) ── github-release
+#   build-ios ─────┘
+#
+# The two build jobs need different hosts (the xcframework needs macOS, the
+# Android libraries need the NDK). The publish job has no Rust toolchain and no
+# ubrn: everything native arrives as an artifact, and it only assembles, checks
+# and publishes.
+#
+# Releases are started by hand. Run the workflow from the release tag.
+#
+# Running from the tag, rather than passing the tag as an input, makes the run's
+# ref and commit the tag's, which is what npm provenance and the GitHub
+# attestation record.
+#
+# Without `publish`, the run does everything except the publish itself
+# (`npm publish --dry-run`). That is how to rehearse a release, on the tag or on
+# a branch. Publishing is refused unless the run is on a tag.
+#
+# npm publishing uses trusted publishing (OIDC). This repository and workflow
+# must be registered as a trusted publisher for bdk-rn on npmjs.com, and no npm
+# token is stored. Provenance is attached to every publish.
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish to npm and create the GitHub release (requires running from a tag)"
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Same NDK as test-android.yaml and tests/android/build.gradle.
+  NDK_VERSION: "27.1.12297006"
+
+jobs:
+  check-version:
+    name: "Check version"
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      dist-tag: ${{ steps.version.outputs.dist-tag }}
+      publish: ${{ steps.version.outputs.publish }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: "Read the version and check it against the tag"
+        id: version
+        env:
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          version="$(node --print "require('./package.json').version")"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+              echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}."
+              exit 1
+            fi
+          elif [ "${PUBLISH}" = "true" ]; then
+            echo "::error::Publishing requires running the workflow from a release tag, not the ${GITHUB_REF_NAME} branch."
+            exit 1
+          fi
+          # A prerelease must not take over `latest`, which is what a plain
+          # `npm install bdk-rn` resolves to.
+          case "${version}" in
+            *-*) dist_tag="next" ;;
+            *)   dist_tag="latest" ;;
+          esac
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "dist-tag=${dist_tag}" >> "${GITHUB_OUTPUT}"
+          echo "publish=${PUBLISH}" >> "${GITHUB_OUTPUT}"
+          if [ "${PUBLISH}" = "true" ]; then
+            echo "Publishing ${version} under the '${dist_tag}' dist-tag."
+          else
+            echo "Rehearsing ${version} under the '${dist_tag}' dist-tag (dry run)."
+          fi
+
+  build-android:
+    name: "Build Android libraries"
+    needs: check-version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+          persist-credentials: false
+
+      # Two release builds of bdk-ffi leave a large target directory.
+      - name: "Free disk space"
+        run: sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+
+      - name: "Set up Android NDK"
+        run: |
+          yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --install "ndk;${NDK_VERSION}" > /dev/null
+          echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> "${GITHUB_ENV}"
+          echo "ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> "${GITHUB_ENV}"
+
+      - name: "Set up just"
+        uses: extractions/setup-just@v3
+
+      - name: "Set up pnpm"
+        uses: pnpm/action-setup@v5
+
+      # No dependency cache in this workflow: its output is what gets published.
+      - name: "Set up Node"
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: "Install dependencies"
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: "Apply the bdk-ffi async-sync patches"
+        run: just submodule-apply-patch
+
+      # bdk-ffi pins its toolchain in rust-toolchain.toml, and cargo runs inside
+      # that directory, so the targets have to be added to that toolchain.
+      - name: "Set up Rust"
+        working-directory: bdk-ffi/bdk-ffi
+        run: |
+          rustup toolchain install
+          rustup target add aarch64-linux-android x86_64-linux-android
+          rustc --version
+
+      - name: "Install cargo-ndk"
+        run: cargo install cargo-ndk --locked
+
+      - name: "Build the libraries and generate the bindings"
+        run: pnpm ubrn:android --config ubrn.config.yaml
+
+      # ubrn also regenerates the committed glue (android/, ios/, the podspec,
+      # src/NativeBdkRn.ts). What ships must be what is in the repository.
+      - name: "Check the committed glue matches the generated glue"
+        run: |
+          if [ -n "$(git status --porcelain -- . ':(exclude)bdk-ffi')" ]; then
+            git status --short -- . ':(exclude)bdk-ffi'
+            git diff -- . ':(exclude)bdk-ffi'
+            echo "::error::ubrn regenerated committed files. Run the build locally and commit the result."
+            exit 1
+          fi
+
+      - name: "Upload the Android libraries"
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-jnilibs
+          path: android/src/main/jniLibs
+          if-no-files-found: error
+
+      - name: "Upload the generated bindings"
+        uses: actions/upload-artifact@v7
+        with:
+          name: bindings-android
+          path: |
+            cpp
+            src/generated
+          if-no-files-found: error
+
+  build-ios:
+    name: "Build iOS xcframework"
+    needs: check-version
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: "Set up just"
+        uses: extractions/setup-just@v3
+
+      - name: "Set up pnpm"
+        uses: pnpm/action-setup@v5
+
+      - name: "Set up Node"
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: "Install dependencies"
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: "Apply the bdk-ffi async-sync patches"
+        run: just submodule-apply-patch
+
+      - name: "Set up Rust"
+        working-directory: bdk-ffi/bdk-ffi
+        run: |
+          rustup toolchain install
+          rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+          rustc --version
+
+      - name: "Build the xcframework and generate the bindings"
+        run: pnpm ubrn:ios --config ubrn.config.yaml
+
+      - name: "Check the committed glue matches the generated glue"
+        run: |
+          if [ -n "$(git status --porcelain -- . ':(exclude)bdk-ffi')" ]; then
+            git status --short -- . ':(exclude)bdk-ffi'
+            git diff -- . ':(exclude)bdk-ffi'
+            echo "::error::ubrn regenerated committed files. Run the build locally and commit the result."
+            exit 1
+          fi
+
+      - name: "Upload the xcframework"
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-xcframework
+          path: BdkRnFramework.xcframework
+          if-no-files-found: error
+
+      - name: "Upload the generated bindings"
+        uses: actions/upload-artifact@v7
+        with:
+          name: bindings-ios
+          path: |
+            cpp
+            src/generated
+          if-no-files-found: error
+
+  publish:
+    name: "Publish to npm"
+    needs: [check-version, build-android, build-ios]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      VERSION: ${{ needs.check-version.outputs.version }}
+      DIST_TAG: ${{ needs.check-version.outputs.dist-tag }}
+      PUBLISH: ${{ needs.check-version.outputs.publish }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: "Set up pnpm"
+        uses: pnpm/action-setup@v5
+
+      - name: "Set up Node"
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing needs npm 11.5.1 or later.
+      - name: "Update npm"
+        run: npm install --global npm@^11.5.1
+
+      - name: "Install dependencies"
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: "Download the Android libraries"
+        uses: actions/download-artifact@v8
+        with:
+          name: android-jnilibs
+          path: android/src/main/jniLibs
+
+      - name: "Download the xcframework"
+        uses: actions/download-artifact@v8
+        with:
+          name: ios-xcframework
+          path: BdkRnFramework.xcframework
+
+      - name: "Download the generated bindings"
+        uses: actions/download-artifact@v8
+        with:
+          pattern: bindings-*
+          path: bindings
+
+      # Both build jobs generate the bindings. They embed checksums of the Rust
+      # API that uniffi checks at startup, so one set has to be right for both
+      # platforms. Ship the Android copy only after confirming the two match.
+      - name: "Check both platforms generated the same bindings"
+        run: |
+          diff --recursive bindings/bindings-android bindings/bindings-ios
+          cp -R bindings/bindings-android/cpp .
+          mkdir -p src/generated
+          cp -R bindings/bindings-android/src/generated/. src/generated/
+          rm -rf bindings
+
+      - name: "Build the JavaScript"
+        run: pnpm prepare
+
+      - name: "Check the package contents"
+        run: node scripts/verify-package.js
+
+      # Pack once and publish that exact file, so the tarball attached to the
+      # GitHub release is byte-for-byte the one on npm.
+      - name: "Pack"
+        run: npm pack --ignore-scripts
+
+      - name: "Publish"
+        run: |
+          tarball="bdk-rn-${VERSION}.tgz"
+          if [ "${PUBLISH}" = "true" ]; then
+            npm publish "${tarball}" --provenance --access public --tag "${DIST_TAG}"
+          else
+            echo "Dry run: publish was not requested."
+            npm publish "${tarball}" --dry-run --access public --tag "${DIST_TAG}"
+          fi
+
+      - name: "Upload the tarball"
+        uses: actions/upload-artifact@v7
+        with:
+          name: npm-tarball
+          path: bdk-rn-${{ env.VERSION }}.tgz
+          if-no-files-found: error
+
+  # After npm, so a release never describes a version that failed to publish.
+  github-release:
+    name: "Create GitHub release"
+    needs: [check-version, publish]
+    if: needs.check-version.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      VERSION: ${{ needs.check-version.outputs.version }}
+    steps:
+      - name: "Download the tarball"
+        uses: actions/download-artifact@v8
+        with:
+          name: npm-tarball
+
+      - name: "Checksum"
+        run: sha256sum "bdk-rn-${VERSION}.tgz" > "bdk-rn-${VERSION}.tgz.sha256"
+
+      - name: "Attest build provenance"
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: bdk-rn-${{ env.VERSION }}.tgz
+
+      - name: "Create the release"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          prerelease=""
+          case "${VERSION}" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "${GITHUB_REF_NAME}" \
+            "bdk-rn-${VERSION}.tgz" "bdk-rn-${VERSION}.tgz.sha256" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag \
+            ${prerelease}
