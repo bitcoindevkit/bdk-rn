@@ -5,6 +5,12 @@ rust:
 android:
   targets:
     - arm64-v8a
+  # Link the Rust library as a .so rather than a static archive. The binaries
+  # ship in the npm package, and a static archive carries every object file in
+  # the dependency graph: ~150 MB per ABI, against ~15 MB for the linked .so.
+  # ubrn requires the .so to keep its symbols. The release-smaller profile only
+  # strips debuginfo, which leaves them intact.
+  useSharedLibrary: true
 
 ios:
   targets:

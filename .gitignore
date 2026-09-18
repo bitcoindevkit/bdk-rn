@@ -79,6 +79,7 @@ nitrogen/
 # Rust
 target/
 libbdkffi.a
+android/src/main/jniLibs/
 
 # Other
 temp/
