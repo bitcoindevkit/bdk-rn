@@ -30,15 +30,26 @@ just pod-install
 just run-ios
 ```
 
-- [ ] Create the tag
-- [ ] Build the tarball
-- [ ] Sign the artifact
-- [ ] Create the release on GitHub
-- [ ] Let people know!
+- [ ] Bump the version in `package.json` and merge it
+- [ ] Create and push the signed tag on the commit with the bumped version.
+      Pushing the tag does not publish anything
 
 ```shell
 git tag v1.1.0 --sign --edit
 git push upstream v1.1.0
 ```
+
+- [ ] Rehearse the release: run the Release workflow from the tag without
+      `publish`. It builds everything and runs `npm publish --dry-run`
+- [ ] Publish: run the Release workflow from the tag with `publish` checked. It
+      publishes to npm and creates the GitHub release with the same tarball attached
+
+```shell
+gh workflow run release.yml --repo bitcoindevkit/bdk-rn --ref v1.1.0                        # rehearse
+gh workflow run release.yml --repo bitcoindevkit/bdk-rn --ref v1.1.0 --field publish=true   # publish
+```
+
+- [ ] Check the workflow succeeded and `npm view bdk-rn dist-tags` shows the new version
+- [ ] Let people know!
 
 - [ ] Bump the `next` version on `master`
