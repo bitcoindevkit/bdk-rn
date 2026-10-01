@@ -1,0 +1,9 @@
+# Keep in sync with bdk-ffi/bdk-ffi/rust-toolchain.toml.
+#
+# ubrn runs `cargo run` from this directory, and rustup passes the toolchain it
+# picks here to child processes through RUSTUP_TOOLCHAIN, which overrides
+# bdk-ffi's own rust-toolchain.toml. This file is what actually pins the
+# toolchain that builds bdk-ffi.
+[toolchain]
+channel = "1.90.0"
+components = ["clippy", "rustfmt"]
