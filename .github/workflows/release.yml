@@ -263,7 +263,12 @@ jobs:
           node-version-file: .nvmrc
           registry-url: "https://registry.npmjs.org"
 
-      # Trusted publishing needs npm 11.5.1 or later.
+      # Trusted publishing needs npm 11.5.1 or later, and Node 22.14.0 or later
+      # (pinned in .nvmrc). Neither shows up in a dry run, which never
+      # authenticates. When the token exchange fails, npm falls back to the
+      # placeholder NODE_AUTH_TOKEN that setup-node writes and the registry
+      # answers "404 Not Found" on the PUT: the same error as a mismatched
+      # trusted publisher configuration on npmjs.com.
       - name: "Update npm"
         run: npm install --global npm@^11.5.1
 
