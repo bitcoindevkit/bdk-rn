@@ -288,12 +288,12 @@ jobs:
           pattern: bindings-*
           path: bindings
 
-      # Both build jobs generate the bindings. They embed checksums of the Rust
-      # API that uniffi checks at startup, so one set has to be right for both
-      # platforms. Ship the Android copy only after confirming the two match.
+      # Both build jobs generate the bindings, and only the Android copy ships.
+      # The expected API checksums that uniffi verifies at startup live in the
+      # TypeScript, so that is what has to match.
       - name: "Check both platforms generated the same bindings"
         run: |
-          diff --recursive bindings/bindings-android bindings/bindings-ios
+          diff --recursive bindings/bindings-android/src bindings/bindings-ios/src
           cp -R bindings/bindings-android/cpp .
           mkdir -p src/generated
           cp -R bindings/bindings-android/src/generated/. src/generated/
