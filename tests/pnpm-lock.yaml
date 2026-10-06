@@ -12,8 +12,8 @@ importers:
         specifier: 0.82.1
         version: 0.82.1(@types/react@19.2.14)(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1)
       bdk-rn:
-        specifier: file:../bdk-rn-1.1.0-alpha.0.tgz
-        version: file:../bdk-rn-1.1.0-alpha.0.tgz(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1)
+        specifier: file:../bdk-rn-1.2.0-dev.tgz
+        version: file:../bdk-rn-1.2.0-dev.tgz(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1)
       react:
         specifier: 19.1.1
         version: 19.1.1
@@ -1358,9 +1358,9 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  bdk-rn@file:../bdk-rn-1.1.0-alpha.0.tgz:
-    resolution: {integrity: sha512-Xed2lu5C6D3QuaILPqyg5YiUZ9GCuMUERx6mZ0m28GodOPyCXhJr7JJ5+QvRIkCUqaZklN6ywv1VtDFpOndLbg==, tarball: file:../bdk-rn-1.1.0-alpha.0.tgz}
-    version: 1.1.0-alpha.0
+  bdk-rn@file:../bdk-rn-1.2.0-dev.tgz:
+    resolution: {integrity: sha512-15UPGFerU1MMfdCUinTeUO0eqw7OmHetVi63itAcH6C68w3b7bTp+Yvr776+mAaVPZAjeFG3cqnaqRYgJ/QXkw==, tarball: file:../bdk-rn-1.2.0-dev.tgz}
+    version: 1.2.0-dev
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -5333,7 +5333,7 @@ snapshots:
 
   baseline-browser-mapping@2.10.29: {}
 
-  bdk-rn@file:../bdk-rn-1.1.0-alpha.0.tgz(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1):
+  bdk-rn@file:../bdk-rn-1.2.0-dev.tgz(react-native@0.82.1(@babel/core@7.29.0)(@react-native-community/cli@20.0.0(typescript@5.9.3))(@react-native/metro-config@0.82.1(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.1.1))(react@19.1.1):
     dependencies:
       '@ubjs/core': 0.31.0-5
       react: 19.1.1

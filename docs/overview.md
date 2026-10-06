@@ -10,7 +10,7 @@ npm install bdk-rn
 
 The package ships prebuilt native libraries for iOS and Android, so you do not need a Rust toolchain, and nothing is compiled or downloaded at install time.
 
-While 1.x is in prerelease, versions are published under the `next` tag. Install one with `npm install bdk-rn@next`.
+Prereleases (betas and release candidates) are published under the `next` tag instead of `latest`, so `npm install bdk-rn` never picks one up. To try the most recent one, run `npm install bdk-rn@next`.
 
 ### Requirements
 
